@@ -1,0 +1,3 @@
+Please note:
+
+- There is some duplication between affine and smartfloat. I'm in the process of cleaning it up.
