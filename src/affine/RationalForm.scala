@@ -18,7 +18,7 @@ object RationalForm {
   }
 
   // This is the equivalent of adding [-a, a]
-  def addNoise(n: Rational, x: RationalForm): RationalForm = {
+  def addNoise(x: RationalForm, n: Rational): RationalForm = {
     val newTerms = new Queue[Deviation]()
     var iter = x.noise.iterator
     while(iter.hasNext) {

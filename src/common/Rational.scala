@@ -3,19 +3,17 @@ package ceres.common
 import scala.math.{ScalaNumericConversions, ScalaNumber}
 import java.math.{BigInteger, BigDecimal}
 
-/*   TODO
-  - investigate why 4.45 is not translated into 445/100 but some huge numbers
-
-*/
-
 
 object Rational {
 
   case class RationalCannotBeCastToIntException(s: String) extends Exception
 
-  private val one = new BigInt(new BigInteger("1"))
-  private val zero = new BigInt(new BigInteger("0"))
-  private val two = new BigInt(new BigInteger("2"))
+  private val oneBigInt = new BigInt(new BigInteger("1"))
+  private val zeroBigInt = new BigInt(new BigInteger("0"))
+  private val twoBigInt = new BigInt(new BigInteger("2"))
+
+  val zero = Rational(zeroBigInt, oneBigInt)
+  val one = Rational(oneBigInt, oneBigInt)
 
   /*
     Constructors for rationals.
@@ -25,14 +23,9 @@ object Rational {
     Rational(n, d)
   }
 
-  def apply(n: Int): Rational = Rational(new BigInt(new BigInteger(n.toString)), one)
+  def apply(n: Int): Rational = Rational(new BigInt(new BigInteger(n.toString)), oneBigInt)
  
   def apply(n: Long, d: Long): Rational = {
-    /*if (n == 0 && d == 0) Rational(0)
-    val (num, den) = formatFraction(new BigInt(new BigInteger(n.toString)), new BigInt(new BigInteger(d.toString)))
-    if(den < 0) new Rational(-num, -den)
-    else new Rational(num, den)
-    */
     Rational(new BigInt(new BigInteger(n.toString)), new BigInt(new BigInteger(d.toString)))
   }
 
@@ -41,7 +34,7 @@ object Rational {
   def apply(n: BigInt, d: BigInt): Rational = {
     // 0/0 -> 0/1
     if (n == 0 && d == 0) {
-      new Rational(zero, one)
+      new Rational(zeroBigInt, oneBigInt)
     }
     else if (d == 0) {
       throw new Exception("Zero denominator is not allowed.")
@@ -56,11 +49,53 @@ object Rational {
     }
   }
 
+  def rationalFromReal(dbl: Double): Rational = {
+    val (n, d) = real2Fraction(dbl.toString)
+    Rational(n, d)
+  }
+
+  //Takes a string representing a real value and returns a fraction equal to it.
+  // We assume this string comes directly from variable.toString, so it does not
+  // have trailing zeroes, always has one decimal point, etc. 
+  // This works because of a property of the IEEE 754 standard that requires that
+  // one can recover the exact string by going to double and back.
+  private def real2Fraction(value: String): (BigInt, BigInt) = {
+    
+    // scientific notation
+    if (value.contains("e") || value.contains("E")) {
+      val splitExponent = value.split(Array('e', 'E'))
+  
+      val nom = new BigInt(new BigInteger(splitExponent(0).replace(".", "")))
+      val splitDecimal = splitExponent(0).split('.')
+      val denPower = splitDecimal(1).length - splitExponent(1).toInt
+
+      if (denPower > 0) {
+        val den = new BigInt(new BigInteger(math.pow(10, denPower).toLong.toString))
+        (nom, den)
+      } else {
+        val den = new BigInt(new BigInteger("1"))
+        val newNom = nom * new BigInt(new BigInteger(math.pow(10, -denPower).toLong.toString))
+        (newNom, den)
+      }
+    }
+    // decimal notation
+    else {
+      // nominator as simply all digits without the decimal sign
+      val nom = new BigInt(new BigInteger(value.replace(".", "")))
+      val parts = value.split('.')
+      // can this overflow?
+      val den = new BigInt(new BigInteger(math.pow(10, parts(1).length).toLong.toString))
+      (nom, den)
+    }
+
+  }
+
   // How to get the different parts is taken from the Java API documentation
   // of longBitsToDouble
+  // This however, only converts FLOATING-POINT values, not the real values
+  // you get from the String representation.
   def double2Fraction(double: Double): (BigInt, BigInt) = {
     val bits: Long = java.lang.Double.doubleToLongBits(double)
-    //println("bits: \n" + java.lang.Long.toBinaryString(bits))
 
     if (bits == 0x7ff0000000000000L)
       throw new ArithmeticException("cannot convert +infinity to a fraction")
@@ -70,25 +105,17 @@ object Rational {
       throw new ArithmeticException("cannot convert NaN to a fraction")
     
     val sign = if ((bits >> 63) == 0) 1 else -1
-    //println("sign: " + sign)
 
     val exponent = ((bits >> 52) & 0x7ffL).toInt
-    //println("exponent: " + java.lang.Long.toBinaryString(exponent))
-    //println("exponent: " + exponent)
-    //println("true exponent: " + (exponent - 1023))
 
     val mantissa =
       if (exponent == 0) (bits & 0xfffffffffffffL) << 1
       else (bits & 0xfffffffffffffL) | 0x10000000000000L
-    //println("mantissa: " + java.lang.Long.toBinaryString(mantissa))
 
     val trueExponent = exponent - 1075
-    
-    val result = if (trueExponent > 0) (two.pow(trueExponent) * mantissa * sign, one)
-    else (new BigInt(new BigInteger((sign * mantissa).toString)), two.pow(-trueExponent))
-    //println(result)
-    //println(result._1.toDouble / result._2.toDouble)
-    result
+
+    if (trueExponent > 0) (twoBigInt.pow(trueExponent) * mantissa * sign, oneBigInt)
+    else (new BigInt(new BigInteger((sign * mantissa).toString)), twoBigInt.pow(-trueExponent))
   }
 
 
@@ -100,121 +127,97 @@ object Rational {
     This will throw and exception if the number is too large to fit into an Int.
   */
   def scaleToIntsUp(r: Rational): Rational = {
-    //println("\n------------------")
-    //println("Original: " + r.toDouble)
-    
+   
     // Too large
     if (math.abs(r.toDouble) > Int.MaxValue) {
-      //println("too big")
       throw new RationalCannotBeCastToIntException(
         "Rational too big to be cast to integer rational.")
     }
     // Too small
     if (math.abs(r.toDouble) < MIN_INT_RATIONAL) {
-      //println("too small")
       //throw new RationalCannotBeCastToIntException(
       //  "Rational too big to be cast to integer rational.")
       
       // Underflow
-      if (r < Rational(0)) return Rational(0l, 1l)
-      else return Rational(1l, Int.MaxValue.toLong)
-    }
-    val num = r.n
-    val den = r.d
+      if (r < Rational(0)) Rational(0l, 1l)
+      else Rational(1l, Int.MaxValue.toLong)
+    } else {
+
+      val num = r.n
+      val den = r.d
    
-    // Already small enough
-    if (num.abs < Int.MaxValue && den < Int.MaxValue) {
-      //println("already good")
-      return r
+      // Already small enough
+      if (num.abs < Int.MaxValue && den < Int.MaxValue) {
+        r
+      } else {
+
+        // Divide top and bottom
+        val divN = if (num.bitLength < 32) oneBigInt else twoBigInt.pow(num.bitLength - 31)
+        val divD = if (den.bitLength < 32) oneBigInt else twoBigInt.pow(den.bitLength - 31)
+        val div = divN.max(divD)
+
+        var nn = num / div
+        var dd = den / div
+
+        // Adjust result to get most precise possible
+        var i = 0
+        while ((nn.toDouble/dd.toDouble) < r.toDouble && i < 10000) {
+          if (nn < Int.MaxValue)
+            nn = nn + 1
+          else
+            dd = dd - 1
+          i = i + 1
+        }
+        Rational(nn, dd)
+      }
     }
-    //println("n: " + num.toString + "   bitlength: " + num.bitLength)
-    //println("d: " + den.toString + "   bitlength: " + den.bitLength)
- 
-    val divN = if (num.bitLength < 32) one else two.pow(num.bitLength - 31)
-    val divD = if (den.bitLength < 32) one else two.pow(den.bitLength - 31)
-    val div = divN.max(divD)
-
-    var nn = num / div
-    //println("nn: " + nn.toString + "      valid Int? " + nn.isValidInt)
-
-    var dd = den / div
-    //println("dd: " + dd.toString + "      valid Int? " + dd.isValidInt)
-    //println("initial diff: " + (r.toDouble - nn.toDouble/dd.toDouble))
-    //println((nn.toDouble/dd.toDouble) < r.toDouble)
-
-    var i = 0
-    while ((nn.toDouble/dd.toDouble) < r.toDouble && i < 10000) {
-      if (nn < Int.MaxValue)
-        nn = nn + 1
-      else
-        dd = dd - 1
-      //println(nn + " ---- " + (nn.toDouble/dd.toDouble))
-      i = i + 1
-    }
-    /*println("nn: " + nn.toString + "      valid Int? " + nn.isValidInt)
-    println("dd: " + dd.toString + "      valid Int? " + dd.isValidInt)
-    println("final diff:   " + (r.toDouble - nn.toDouble/dd.toDouble))
-    println("produced: " + nn.toDouble/dd.toDouble)
-    */
-    return Rational(nn, dd)
-  }
+  } ensuring (res => res.toDouble >= r.toDouble)
   
   /**
     Creates a new rational number where the nominator and denominator consists
     of 32 bit integers. The number will be smaller than the original.
   */
   def scaleToIntsDown(r: Rational): Rational = {
-    //println("\n------------------\n Original: " + r.toDouble)
     
     // Too large
     if (math.abs(r.toDouble) > Int.MaxValue) {
-      //println("too big")
       throw new RationalCannotBeCastToIntException(
         "Rational too big to be cast to integer rational.")
     }
     // Too small
     if (math.abs(r.toDouble) < MIN_INT_RATIONAL) {
-      //println("too small")
       //throw new RationalCannotBeCastToIntException(
       //  "Rational too big to be cast to integer rational.")
       // Underflow
-      if (r < Rational(0)) return Rational(-1l, Int.MaxValue.toLong) 
-      else return Rational(0.0)
-    }
-    val num = r.n
-    val den = r.d
+      if (r < Rational(0)) Rational(-1l, Int.MaxValue.toLong) 
+      else Rational(0.0)
+    } else {
+    
+      val num = r.n
+      val den = r.d
    
-    // Already small enough
-    if (num.abs < Int.MaxValue && den < Int.MaxValue) {
-      //println("already good")
-      return r
-    }
-    //println("n: " + num.toString + "   bitlength: " + num.bitLength)
-    //println("d: " + den.toString + "   bitlength: " + den.bitLength)   
+      // Already small enough
+      if (num.abs < Int.MaxValue && den < Int.MaxValue) {
+        r
+      } else {
  
-    val divN = if (num.bitLength < 32) one else two.pow(num.bitLength - 31)
-    val divD = if (den.bitLength < 32) one else two.pow(den.bitLength - 31)
-    val div = divN.max(divD)
+        val divN = if (num.bitLength < 32) oneBigInt else twoBigInt.pow(num.bitLength - 31)
+        val divD = if (den.bitLength < 32) oneBigInt else twoBigInt.pow(den.bitLength - 31)
+        val div = divN.max(divD)
 
-    var nn = num / div
-    //println("nn: " + nn.toString + "      valid Int? " + nn.isValidInt)
+        var nn = num / div
+        var dd = den / div
 
-    var dd = den / div
-    //println("dd: " + dd.toString + "      valid Int? " + dd.isValidInt)
-    //println("initial diff: " + (r.toDouble - nn.toDouble/dd.toDouble))
-
-    var i = 0
-    while ((nn.toDouble/dd.toDouble) > r.toDouble && i < 10000) {
-      if (nn > Int.MinValue) nn = nn - 1
-      else dd = dd + 1
-      i = i + 1
+        var i = 0
+        while ((nn.toDouble/dd.toDouble) > r.toDouble && i < 10000) {
+          if (nn > Int.MinValue) nn = nn - 1
+          else dd = dd + 1
+          i = i + 1
+        }
+        Rational(nn, dd)
+      }
     }
-
-    //println("final diff:   " + (r.toDouble - nn.toDouble/dd.toDouble))
-    //println("produced: " + nn.toDouble/dd.toDouble)
-
-    return Rational(nn, dd)
-  }
+  } ensuring (res => res.toDouble <= r.toDouble)
 
 
   def abs(r: Rational): Rational = {
@@ -261,9 +264,8 @@ class Rational private(val n: BigInt, val d: BigInt) extends ScalaNumber with Sc
   def *(other: Rational): Rational = Rational(n * other.n, d * other.d)
   def /(other: Rational): Rational = Rational(n * other.d, d* other.n)
 
-  override def toString: String = {
-    niceDoubleString(this.toDouble)//"%.16g".format(this.toDouble)
-  }
+  override def toString: String = niceDoubleString(this.toDouble)
+
   def toFractionString: String = "(%s)/(%s)".format(n.toString, d.toString)
 
   def integerPart: Int = doubleValue.toInt
@@ -289,9 +291,6 @@ class Rational private(val n: BigInt, val d: BigInt) extends ScalaNumber with Sc
 
   override def byteValue(): Byte = Predef.double2Double(doubleValue).byteValue
   override def doubleValue(): Double = {
-    // It seems to work with just double conversion before anyway.
-    //println("\n" + (new BigDecimal(n.bigInteger).divide(new BigDecimal(d.bigInteger), 300, BigDecimal.ROUND_HALF_EVEN)).doubleValue)
-    //println(n.toDouble / d.toDouble)
     n.toDouble / d.toDouble
   }
   override def floatValue(): Float = Predef.double2Double(doubleValue).floatValue
