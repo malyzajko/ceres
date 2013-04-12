@@ -127,7 +127,6 @@ object Rational {
     This will throw and exception if the number is too large to fit into an Int.
   */
   def scaleToIntsUp(r: Rational): Rational = {
-   
     // Too large
     if (math.abs(r.toDouble) > Int.MaxValue) {
       throw new RationalCannotBeCastToIntException(
@@ -161,18 +160,25 @@ object Rational {
 
         // Adjust result to get most precise possible
         var i = 0
-        while ((nn.toDouble/dd.toDouble) < r.toDouble && i < 10000) {
+        while ((nn.toDouble/dd.toDouble) < r.toDouble && i < Int.MaxValue) {
           if (nn < Int.MaxValue)
             nn = nn + 1
           else
             dd = dd - 1
           i = i + 1
         }
-        Rational(nn, dd)
+        if (i > 10000) {
+          println(">>> WARNING: inefficient scaleToIntsUp computation for " + 
+            r.toFractionString)
+        }
+        val res = Rational(nn, dd)
+        assert(res.toDouble >= r.toDouble, "res (" + res.toDouble + ") is smaller than before (" + r.toDouble) 
+        res
       }
     }
-  } ensuring (res => res.toDouble >= r.toDouble)
+  } //ensuring (res => res.toDouble >= r.toDouble)
   
+
   /**
     Creates a new rational number where the nominator and denominator consists
     of 32 bit integers. The number will be smaller than the original.
@@ -209,15 +215,21 @@ object Rational {
         var dd = den / div
 
         var i = 0
-        while ((nn.toDouble/dd.toDouble) > r.toDouble && i < 10000) {
+        while ((nn.toDouble/dd.toDouble) > r.toDouble && i < Int.MaxValue) {
           if (nn > Int.MinValue) nn = nn - 1
           else dd = dd + 1
           i = i + 1
         }
-        Rational(nn, dd)
+        if (i > 10000) {
+          println(">>> WARNING: inefficient scaleToIntsDown computation for " + 
+            r.toFractionString)
+        }
+        val res = Rational(nn, dd)
+        assert(res.toDouble <= r.toDouble, "res (" + res.toDouble + ") is larger than before (" + r.toDouble + "   i:" +i) 
+        res
       }
     }
-  } ensuring (res => res.toDouble <= r.toDouble)
+  } //ensuring (res => res.toDouble <= r.toDouble)
 
 
   def abs(r: Rational): Rational = {
