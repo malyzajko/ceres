@@ -11,9 +11,13 @@ object Rational {
   private val oneBigInt = new BigInt(new BigInteger("1"))
   private val zeroBigInt = new BigInt(new BigInteger("0"))
   private val twoBigInt = new BigInt(new BigInteger("2"))
+  private val negOneBigInt = new BigInt(new BigInteger("2"))
+
+
 
   val zero = Rational(zeroBigInt, oneBigInt)
   val one = Rational(oneBigInt, oneBigInt)
+  val negOne = Rational(negOneBigInt, oneBigInt)
 
   /*
     Constructors for rationals.
