@@ -13,6 +13,10 @@ object Rational {
   private val twoBigInt = new BigInt(new BigInteger("2"))
   private val negOneBigInt = new BigInt(new BigInteger("2"))
 
+  private val MAX_DOUBLE = new BigInt(new BigInteger(Double.MaxValue.toInt.toString))
+  private val MIN_DOUBLE = new BigInt(new BigInteger(Double.MinValue.toInt.toString))
+
+  private val MAX_INT = new BigInt(new BigInteger(Int.MaxValue.toString))
 
 
   val zero = Rational(zeroBigInt, oneBigInt)
@@ -127,6 +131,53 @@ object Rational {
 
   /**
     Creates a new rational number where the nominator and denominator consists
+    of 32 bit integers. The number will be smaller than the original.
+    This will throw and exception if the number is too large to fit into an Int.
+  */
+  def scaleToIntsDown(r: Rational): Rational = {
+    
+    // Too large
+    if (math.abs(r.toDouble) > Int.MaxValue) {
+      throw new RationalCannotBeCastToIntException(
+        "Rational too big to be cast to integer rational.")
+    }
+    // Too small
+    if (math.abs(r.toDouble) < MIN_INT_RATIONAL) {
+      // Underflow
+      if (r < Rational(0)) Rational(-1l, Int.MaxValue.toLong) 
+      else Rational(0.0)
+    } else {
+    
+      val num = r.n.abs
+      val den = r.d
+   
+      // Already small enough
+      if (num < Int.MaxValue && den < Int.MaxValue) {
+        r
+      } else {
+ 
+        val divN = if (num.bitLength < 32) oneBigInt else num / MAX_INT + oneBigInt
+        val divD = if (den.bitLength < 32) oneBigInt else den / MAX_INT + oneBigInt
+        val div = divN.max(divD)
+        val res = 
+          if (r.toDouble > 0.0) {// Rounding down, so num round down, den round up
+            val nn = num / div
+            val dd = den / div + oneBigInt 
+            Rational(nn, dd)
+          } else { // Rounding up, so num rnd up, den rnd down
+            val nn = num / div + oneBigInt
+            val dd = den / div
+            Rational(-nn, dd)
+          }
+        assert(res.toDouble <= r.toDouble, "\nres (" + res.toDouble +
+          ") is larger than before \n   (" + r.toDouble) 
+        res
+      }
+    }
+  }
+
+  /**
+    Creates a new rational number where the nominator and denominator consists
     of 32 bit integers. The returned number is bigger than the original.
     This will throw and exception if the number is too large to fit into an Int.
   */
@@ -138,72 +189,12 @@ object Rational {
     }
     // Too small
     if (math.abs(r.toDouble) < MIN_INT_RATIONAL) {
-      //throw new RationalCannotBeCastToIntException(
-      //  "Rational too big to be cast to integer rational.")
-      
-      // Underflow
-      if (r < Rational(0)) Rational(0l, 1l)
-      else Rational(1l, Int.MaxValue.toLong)
-    } else {
-
-      val num = r.n
-      val den = r.d
-   
-      // Already small enough
-      if (num.abs < Int.MaxValue && den < Int.MaxValue) {
-        r
-      } else {
-
-        // Divide top and bottom
-        val divN = if (num.bitLength < 32) oneBigInt else twoBigInt.pow(num.bitLength - 31)
-        val divD = if (den.bitLength < 32) oneBigInt else twoBigInt.pow(den.bitLength - 31)
-        val div = divN.max(divD)
-
-        var nn = num / div
-        var dd = den / div
-
-        // Adjust result to get most precise possible
-        var i = 0
-        while ((nn.toDouble/dd.toDouble) < r.toDouble && i < Int.MaxValue) {
-          if (nn < Int.MaxValue)
-            nn = nn + 1
-          else
-            dd = dd - 1
-          i = i + 1
-        }
-        if (i > 10000) {
-          println(">>> WARNING: inefficient scaleToIntsUp computation for " + 
-            r.toFractionString)
-        }
-        val res = Rational(nn, dd)
-        assert(res.toDouble >= r.toDouble, "res (" + res.toDouble + ") is smaller than before (" + r.toDouble) 
-        res
-      }
-    }
-  } //ensuring (res => res.toDouble >= r.toDouble)
-  
-
-  /**
-    Creates a new rational number where the nominator and denominator consists
-    of 32 bit integers. The number will be smaller than the original.
-  */
-  def scaleToIntsDown(r: Rational): Rational = {
-    
-    // Too large
-    if (math.abs(r.toDouble) > Int.MaxValue) {
-      throw new RationalCannotBeCastToIntException(
-        "Rational too big to be cast to integer rational.")
-    }
-    // Too small
-    if (math.abs(r.toDouble) < MIN_INT_RATIONAL) {
-      //throw new RationalCannotBeCastToIntException(
-      //  "Rational too big to be cast to integer rational.")
       // Underflow
       if (r < Rational(0)) Rational(-1l, Int.MaxValue.toLong) 
       else Rational(0.0)
     } else {
     
-      val num = r.n
+      val num = r.n.abs
       val den = r.d
    
       // Already small enough
@@ -211,30 +202,26 @@ object Rational {
         r
       } else {
  
-        val divN = if (num.bitLength < 32) oneBigInt else twoBigInt.pow(num.bitLength - 31)
-        val divD = if (den.bitLength < 32) oneBigInt else twoBigInt.pow(den.bitLength - 31)
+        val divN = if (num.bitLength < 32) oneBigInt else num / MAX_INT + oneBigInt
+        val divD = if (den.bitLength < 32) oneBigInt else den / MAX_INT + oneBigInt
         val div = divN.max(divD)
 
-        var nn = num / div
-        var dd = den / div
-
-        var i = 0
-        while ((nn.toDouble/dd.toDouble) > r.toDouble && i < Int.MaxValue) {
-          if (nn > Int.MinValue) nn = nn - 1
-          else dd = dd + 1
-          i = i + 1
-        }
-        if (i > 10000) {
-          println(">>> WARNING: inefficient scaleToIntsDown computation for " + 
-            r.toFractionString)
-        }
-        val res = Rational(nn, dd)
-        assert(res.toDouble <= r.toDouble, "res (" + res.toDouble + ") is larger than before (" + r.toDouble + "   i:" +i) 
+        val res = 
+          if (r.toDouble > 0.0) {// Rounding up, so num round up, den round down
+            val nn = num / div + oneBigInt
+            val dd = den / div 
+            Rational(nn, dd)
+          } else {
+            val nn = num / div
+            val dd = den / div + oneBigInt
+            Rational(-nn, dd)
+          }
+        assert(res.toDouble >= r.toDouble, "\nres (" + res.toDouble +
+          ") is larger than before\n    (" + r.toDouble) 
         res
       }
     }
-  } //ensuring (res => res.toDouble <= r.toDouble)
-
+  }
 
   def abs(r: Rational): Rational = {
     if (r.n < 0) return new Rational(-r.n, r.d)
@@ -259,8 +246,6 @@ object Rational {
   private def gcd(a: BigInt, b: BigInt): BigInt =
     if (b == 0) a else gcd(b, a % b)
 
-  val MAX_DOUBLE = new BigInt(new BigInteger(Double.MaxValue.toInt.toString))
-  //private val MIN_DOUBLE = new BigInt(new BigInteger(Double.MinValue))
 }
 
 /**
