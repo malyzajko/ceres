@@ -1,7 +1,7 @@
 package ceres.common
 
 import scala.math.{ScalaNumericConversions, ScalaNumber}
-import java.math.{BigInteger, BigDecimal}
+import java.math.{BigInteger}
 
 
 object Rational {
@@ -246,6 +246,7 @@ object Rational {
   private def gcd(a: BigInt, b: BigInt): BigInt =
     if (b == 0) a else gcd(b, a % b)
 
+  private val mathContext = new java.math.MathContext(64, java.math.RoundingMode.HALF_EVEN)
 }
 
 /**
@@ -292,7 +293,10 @@ class Rational private(val n: BigInt, val d: BigInt) extends ScalaNumber with Sc
 
   override def byteValue(): Byte = Predef.double2Double(doubleValue).byteValue
   override def doubleValue(): Double = {
-    n.toDouble / d.toDouble
+    val bigN = new java.math.BigDecimal(n.bigInteger, mathContext)
+    val bigD = new java.math.BigDecimal(d.bigInteger, mathContext)
+    val res = bigN.divide(bigD, mathContext)
+    res.doubleValue
   }
   override def floatValue(): Float = Predef.double2Double(doubleValue).floatValue
   override def intValue(): Int = Predef.double2Double(doubleValue).intValue
