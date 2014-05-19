@@ -48,8 +48,8 @@ object QuadDouble {
   def min(x: QuadDouble, y: QuadDouble): QuadDouble = if (x < y) x else y
 }
 
-class QuadDouble(val x0: Double, val x1: Double, val x2: Double, val x3: Double)
-  extends ScalaNumber with ScalaNumericConversions with Ordered[QuadDouble] {
+class QuadDouble(val x0: Double, val x1: Double, val x2: Double, val x3: Double) extends ScalaNumber with Ordered[QuadDouble] {
+//with ScalaNumericConversions with Ordered[QuadDouble] {
   import QuadDouble._
 
   def this(d: Double) = this(d, 0.0, 0.0, 0.0)
@@ -118,19 +118,19 @@ class QuadDouble(val x0: Double, val x1: Double, val x2: Double, val x3: Double)
   override def doubleValue(): Double = (x3 + x2 + x1 + x0)
   override def floatValue(): Float = Predef.double2Double(x0).floatValue
   override def intValue(): Int = Predef.double2Double(x0).intValue
-  override def isValidByte: Boolean = false
+  /*override def isValidByte: Boolean = false
   override def isValidChar: Boolean = false
   override def isValidInt: Boolean = false
-  override def isValidShort: Boolean = false
+  override def isValidShort: Boolean = false*/
   override def longValue(): Long = Predef.double2Double(x0).longValue
   override def shortValue(): Short = Predef.double2Double(x0).shortValue
-  override def toByte: Byte = x0.toByte
-  override def toChar: Char = x0.toChar
-  override def toDouble: Double = (x3 + x2 + x1 + x0)
-  override def toFloat: Float = x0.toFloat
-  override def toInt: Int = x0.toInt
-  override def toLong: Long = x0.toLong
-  override def toShort: Short = x0.toShort
+   def toByte: Byte = x0.toByte
+   def toChar: Char = x0.toChar
+   def toDouble: Double = (x3 + x2 + x1 + x0)
+   def toFloat: Float = x0.toFloat
+   def toInt: Int = x0.toInt
+   def toLong: Long = x0.toLong
+   def toShort: Short = x0.toShort
   def underlying(): AnyRef = this
   override def isWhole(): Boolean = x0 % 1.0 == 0.0 && x1 == 0.0 && x2 == 0.0 && x3 == 0.0
 
