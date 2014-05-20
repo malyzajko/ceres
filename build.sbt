@@ -15,3 +15,12 @@ fork := true
 javaOptions += "-Djava.library.path=lib/"
 
 scalaSource in Compile <<= baseDirectory(_ / "src")
+
+resolvers += "Sonatype OSS Snapshots" at
+  "https://oss.sonatype.org/content/repositories/snapshots"
+
+libraryDependencies += "com.github.axel22" %% "scalameter" % "0.4"
+
+testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
+
+parallelExecution in Test := false

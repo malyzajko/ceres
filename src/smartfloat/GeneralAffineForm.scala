@@ -529,8 +529,11 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
 
 
   //############# QUADRATIC OPTIMIZATION ####################
+  // !!! Note: this is not smart anymore !!!
   lazy val smartMinMaxRadius: (DD, DD) = {
-    sumQueueSmart(xnoise)
+    //sumQueueSmart(xnoise)
+    val radius = sumQueue(xnoise)
+    (Array(-radius(0), -radius(1)), radius)
   }
 
   lazy val smartIntervalExt: (DD, DD) = {
