@@ -11,6 +11,8 @@ import scala.collection.mutable.LinkedList
 object PaperExamples extends App {
 
   dopplerEffect
+
+  bSplines(SmartFloat(0.5, 0.5))
   
   /**
    * Computes the cube root of 10 by Halley's method.
@@ -293,7 +295,32 @@ object PaperExamples extends App {
   
   }
   
- 
+  //true ranges are:= for u \in [0, 1]
+  def bSplines(u: SmartFloat) = {
+    
+    //val u = SmartFloat(0.75, 0.25)
+    //val u = SmartFloat(0.25, 0.25)
+    
+    val oneMinusU = SmartFloat(1.0) - u
+    
+    val b0 = (oneMinusU * oneMinusU * oneMinusU)/6.0
+  
+    val b1 = (u*u*u*3 - u*u*6 + 4.0)/6.0
+  
+    val b2 = (u*u*u*(-3.0) + u*u*3 + u*3 + 1)/6.0
+    
+    val b3 = (-u*u*u)/6.0
+    /*val b0 = u
+    val b1 = u*u
+    val b2 = u*u*u
+    
+    
+    */
+    println("b0: " + b0.toStringWithAbsErrors)
+    println("b1: " + b1.toStringWithAbsErrors)
+    println("b2: " + b2.toStringWithAbsErrors)
+    println("b3: " + b3.toStringWithAbsErrors)
+  }
    
 }
 

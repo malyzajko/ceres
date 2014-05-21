@@ -107,12 +107,7 @@ object PaperBenchmarks extends App {
     println("rel.error of x: " + affineSpring(0.001, 10.0).toStringWithErrors)
 */    
   
-  }
-
-  //def runSmartFloatBenchmarks 
-
-
-  
+  } 
  
   
   /* ###################################
