@@ -6,6 +6,8 @@ import ceres.common.{Interval, NormalInterval, EmptyInterval}
 import java.lang.Math.{nextUp}
 import scala.math.{ScalaNumericConversions, ScalaNumber}
 
+import scala.language.implicitConversions
+
 object IntervalFloat {
 
   implicit def double2IntervalFloat(d : Double): IntervalFloat = new IntervalFloat(d)

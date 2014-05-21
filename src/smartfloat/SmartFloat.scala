@@ -7,6 +7,8 @@ import java.lang.Math.{nextUp}
 
 import scala.math.{ScalaNumericConversions, ScalaNumber}
 
+import scala.language.implicitConversions
+
 object SmartFloat {
   case class SmartFloatComparisonUndetermined(s: String) extends Exception
 

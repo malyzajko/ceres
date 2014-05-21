@@ -4,7 +4,7 @@ import scala.math.{ScalaNumericConversions, ScalaNumber}
 
 import ceres.common.{QuadDoubleInterface => QDI}
 
-//import scala.language.implicitConversions
+import scala.language.implicitConversions
 
 object QuadDouble {
 
