@@ -8,7 +8,7 @@ scalacOptions += "-deprecation"
 
 scalacOptions += "-unchecked"
 
-//scalacOptions in ThisBuild += "-feature"
+scalacOptions += "-feature"
 
 fork := true
 

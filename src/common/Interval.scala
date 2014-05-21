@@ -7,7 +7,7 @@ import scala.Double.{NegativeInfinity => MinusInf}
 import scala.Double.{MaxValue, MinValue}
 import DirectedRounding._
 
-//import scala.language.implicitConversions
+import scala.language.implicitConversions
 
 object Interval {
   implicit def double2Interval(f: Double): Interval = {

@@ -1,10 +1,11 @@
-package ceres.smartfloat
+package ceres.smartratfloat
 
 import CenterForm._
 import ceres.common.DirectedRounding._
 import ceres.common.{Interval, NormalInterval, EmptyInterval}
-import java.lang.Math.{nextUp}
+//import java.lang.Math.{nextUp}
 import scala.Double.{PositiveInfinity => PlusInf, NegativeInfinity => MinusInf}
+
 import scala.math.{ScalaNumericConversions, ScalaNumber}
 
 import scala.language.implicitConversions
@@ -27,7 +28,7 @@ object AffineFloat {
    */
   var conditionFlag = true
 
-  val E = AffineFloat(math.E)
+  /*val E = AffineFloat(math.E)
   val Pi = AffineFloat(math.Pi)
 
   def sqrt(x: AffineFloat): AffineFloat = new AffineFloat(math.sqrt(x.d), x.aa.squareRoot)
@@ -46,7 +47,7 @@ object AffineFloat {
   def asin(x: AffineFloat): AffineFloat = new AffineFloat(math.asin(x.d), x.aa.arcsine)
   def atan(x: AffineFloat): AffineFloat = new AffineFloat(math.atan(x.d), x.aa.arctangent)
   def random: AffineFloat = new AffineFloat(math.random)  //constant
-
+  */
   //Other functions. We'll skip for now: ceil, floor, signum, round.
 
   def abs(x: AffineFloat): AffineFloat = {

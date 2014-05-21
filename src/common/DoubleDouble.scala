@@ -2,7 +2,7 @@ package ceres.common
 
 import scala.math.{ScalaNumericConversions, ScalaNumber}
 
-//import scala.language.implicitConversions
+import scala.language.implicitConversions
 
 object DoubleDouble {
 
