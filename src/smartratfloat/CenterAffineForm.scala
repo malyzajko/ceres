@@ -84,13 +84,16 @@ case class CenterForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
           val inv = 1.0/y0
           if(divD(1.0, y0) == divU(1.0, y0)) CenterForm(inv, Queue.empty) //exact division
           else CenterForm(inv, new Queue(new Noise(newIndex, Rational(DirRound.roundOff(inv)))))
+           //new Queue(new Noise(newIndex, scaleToIntsUp(Rational(DirRound.roundOff(inv))))))
         }
         else {
           /* Calculate the inverse. */
+          println("computing inverse")
           val (alpha, dmin, dmax) = computeInverse(yloD, yhiD, ylo, yhi)
           var zeta: Rational = computeCentralZeta(1.0/y0, alpha, y0)
           if(yloD < 0.0) zeta = -zeta
           val delta = computeDelta(zeta, dmin, dmax)
+          println("computing symmetic unary")
           symmetricUnary(1.0/y0, ynoise, alpha, zeta, delta)
       }
       inverse match {

@@ -108,10 +108,22 @@ class AffineFloat(val d: Double, val aa: AffineForm) extends ScalaNumber
              else if (ff == PlusInf || ff == MinusInf) FullForm
              else new CenterForm(ff))
 
-  def +(y: AffineFloat): AffineFloat = new AffineFloat(this.d + y.d, this.aa + y.aa)
-  def -(y: AffineFloat): AffineFloat = new AffineFloat(this.d - y.d, this.aa - y.aa)
-  def *(y: AffineFloat): AffineFloat = new AffineFloat(this.d * y.d, this.aa * y.aa)
-  def /(y: AffineFloat): AffineFloat = new AffineFloat(this.d / y.d, this.aa / y.aa)
+  def +(y: AffineFloat): AffineFloat = {
+    println("+")
+    new AffineFloat(this.d + y.d, this.aa + y.aa)
+  }
+  def -(y: AffineFloat): AffineFloat = {
+    println("-")
+    new AffineFloat(this.d - y.d, this.aa - y.aa)
+  }
+  def *(y: AffineFloat): AffineFloat = {
+    println("*")
+    new AffineFloat(this.d * y.d, this.aa * y.aa)
+  }
+  def /(y: AffineFloat): AffineFloat = {
+    println("/")
+    new AffineFloat(this.d / y.d, this.aa / y.aa)
+  }
   def unary_-(): AffineFloat = new AffineFloat(-this.d, -this.aa)
 
   def %(y: AffineFloat): AffineFloat = {
@@ -170,8 +182,12 @@ class AffineFloat(val d: Double, val aa: AffineForm) extends ScalaNumber
   }
 
   def toStringWithAbsErrors = {
+    println("d: " + d)
+    println("aa: " + aa.getClass)
     var str = doubleFormat.format(d)
     aa match {
+      case c: CenterForm =>
+        str += " (" + doubleFormat.format(aa.radius) + ")"
       case FullForm => str += " (not computable)"
       case EmptyForm => str += " (not computable)"
       case _ => str += " (" + doubleFormat.format(aa.radius) + ")"

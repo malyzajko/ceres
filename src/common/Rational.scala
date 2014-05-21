@@ -258,6 +258,8 @@ class Rational private(val n: BigInt, val d: BigInt) extends ScalaNumber with Sc
   assert(d > 0, "Rational denominator negative! " + d)  // number can be negative only through nominator
   assert(math.abs(gcd(n, d).toLong) == 1, "Rational not reduced %d / %d!".format(n, d))  // fraction is reduced
 
+  //println("bitlength: " + n.bitLength + ", " + d.bitLength)
+
   def unary_-(): Rational = Rational(-n, d)
   def +(other: Rational): Rational = Rational(n * other.d + other.n * d, d * other.d)
   def -(other: Rational): Rational = Rational(n * other.d - other.n * d, d * other.d)

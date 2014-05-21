@@ -2,20 +2,16 @@ package ceres
 package benchmarks
 
 
-import smartfloat._
+import smartratfloat._
 import scala.collection.mutable.LinkedList
 
 /**
  * These are examples from the Technical Report.
  */
-object PaperExamples extends App {
-
-  //dopplerEffect
-
-  //bSplines(SmartFloat(0.5, 0.5))
+object PaperExamplesRational extends App {
 
   cubeRoot
-  
+
   /**
    * Computes the cube root of 10 by Halley's method.
    */
@@ -33,42 +29,7 @@ object PaperExamples extends App {
   }
   
   
-  /**
-   * Computes the area of a triangle with Kahan's method.
-   */
-  def triangleKahan(aa: SmartFloat, bb: SmartFloat, cc: SmartFloat): SmartFloat = {
-    import SmartFloat._
-    var a = aa
-    var b = bb
-    var c = cc  
-      
-    if(b < a) {
-      val t = a
-      if(c < b) { 
-        a = c; c = t
-      }
-      else {
-        if(c < a) { 
-          a = b; b = c; c = t
-        }
-        else { 
-          a = b; b = t 
-        }
-      }
-    }
-    else if(c < b) {
-      val t = c; c = b;
-      if(c < a) { 
-        b = a; a = t 
-      }
-      else { 
-        b = t 
-      }
-    }
-    sqrt((a+(b+c)) * (c-(a-b)) * (c+(a-b)) * (a+(b-c))) / 4.0
-  }
-  
-  def triangleKahan(aa: AffineFloat, bb: AffineFloat, cc: AffineFloat) = {
+  /*def triangleKahan(aa: AffineFloat, bb: AffineFloat, cc: AffineFloat) = {
     import AffineFloat._
     var a = aa
     var b = bb
@@ -98,9 +59,9 @@ object PaperExamples extends App {
       }
     }
     sqrt((a+(b+c)) * (c-(a-b)) * (c+(a-b)) * (a+(b-c))) / 4.0
-  }
+  }*/
   
-  def triangleKahan(aa: IntervalFloat, bb: IntervalFloat, cc: IntervalFloat) = {
+  /*def triangleKahan(aa: IntervalFloat, bb: IntervalFloat, cc: IntervalFloat) = {
     import IntervalFloat._
     var a = aa
     var b = bb
@@ -131,9 +92,9 @@ object PaperExamples extends App {
     }
       
     sqrt((a+(b+c)) * (c-(a-b)) * (c+(a-b)) * (a+(b-c))) / 4.0
-  }
+  }*/
   
-  def triangleExampleSection = {
+  /*def triangleExampleSection = {
     println("SmartFloat: textbook")
     println(triangleTextbook(9.0, SmartFloat(4.8, 0.09), SmartFloat(4.8, 0.09)))
     println(triangleTextbook(9.0, SmartFloat(4.7, 0.09), SmartFloat(4.7, 0.09)))
@@ -173,13 +134,13 @@ object PaperExamples extends App {
     import AffineFloat._
     val s = (a + b + c)/2.0
     sqrt(s * (s - a) * (s - b) * (s - c))
-  }
+  }*/
   
   
   /**
    * Simulates a undamped, unforced spring.
    */
-  def springSimulation(h:SmartFloat, tmax: Double) = {
+  /*def springSimulation(h:SmartFloat, tmax: Double) = {
     import SmartFloat._
     println("\nSpring simulation for h = " + h)
     //setup
@@ -204,13 +165,13 @@ object PaperExamples extends App {
     
     println("t: " + t.toStringWithAbsErrors + 
        ",\n x: " + x.toStringWithAbsErrors)
-  }
+  }*/
   
   
   /**
    * Computes the roots of a quadratic equation in two different ways.
    */
-  def quadraticEquation {
+  /*def quadraticEquation {
     import AffineFloat._
         
     var a = AffineFloat(2.999)
@@ -236,7 +197,7 @@ object PaperExamples extends App {
     }
   
     println("smarter r1 = " + rk1.toStringWithErrors + " , r2 = " + rk2.toStringWithErrors)
-  }
+  }*/
   
   
   /**
@@ -245,7 +206,7 @@ object PaperExamples extends App {
    * maxNoiseCount = 200, smartQueueLimit = 23, packingFactor = 0.0, packingAvrgScale = 0.50,
    * smartPackingFactor = 0.0, smartPackingAvrgScale = 1.0
    */
-  def dopplerEffect = {
+  /*def dopplerEffect = {
     import SmartFloat._
     
     val T = SmartFloat(10.0, 40.0)
@@ -262,25 +223,9 @@ object PaperExamples extends App {
     println("q3: " + q3.toStringWithAbsErrors)
     println("q4: " + q4.toStringWithAbsErrors)
     println("z: " + z.toStringWithAbsErrors)
-  }
+  }*/
   
   
-  
-  /**
-   * Analyzer the roundoff from the triangle example.
-   * For this to work, you need to change the second import statement in SmartFloat.scala from
-   * import tools.{SmartAForm => CurrentAForm}
-   * to import tools.{ParamAForm => CurrentAForm}
-   */
-  def analyzeTriangles = {
-    triangleTextbook(SmartFloat(9.0), SmartFloat(4.7, 0.19), SmartFloat(4.7, 0.19))
-    
-    println("\n********* affine float **************")
-    triangleTextbook(AffineFloat(9.0), 4.51, 4.51)  //-1, -1
-    triangleTextbook(AffineFloat(9.0), AffineFloat(4.89), AffineFloat(4.89))  //1, 1
-    triangleTextbook(AffineFloat(9.0), AffineFloat(4.51), AffineFloat(4.89))  //-1, 1
-    triangleTextbook(AffineFloat(9.0), AffineFloat(4.600001), AffineFloat(4.59999999))  //0, 0    
-  }
 
   
   /**
@@ -298,7 +243,7 @@ object PaperExamples extends App {
   }
   
   //true ranges are:= for u \in [0, 1]
-  def bSplines(u: SmartFloat) = {
+  /*def bSplines(u: SmartFloat) = {
     
     //val u = SmartFloat(0.75, 0.25)
     //val u = SmartFloat(0.25, 0.25)
@@ -322,7 +267,7 @@ object PaperExamples extends App {
     println("b1: " + b1.toStringWithAbsErrors)
     println("b2: " + b2.toStringWithAbsErrors)
     println("b3: " + b3.toStringWithAbsErrors)
-  }
+  }*/
    
 }
 
