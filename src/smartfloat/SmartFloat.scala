@@ -135,16 +135,16 @@ class SmartFloat(val d: Double, val aa: AffineForm) extends ScalaNumber with Sca
 
   def interval: Interval = {
     aa match {
-      case e: GeneralForm => e.smartInterval
-      //case p: ParamAForm => p.smartInterval
+      case e: GeneralForm => e.interval
+      //case p: ParamAForm => p.interval
       case _=> aa.interval
     }
   }
 
   def relError: Double = {
     aa match {
-      case e: GeneralForm => computeRelErr(e.smartInterval, e.maxRoundoff)
-      //case p: ParamAForm => computeRelErr(p.smartInterval, p.maxRoundoff)
+      case e: GeneralForm => computeRelErr(e.interval, e.maxRoundoff)
+      //case p: ParamAForm => computeRelErr(p.interval, p.maxRoundoff)
       case FullForm => scala.Double.NaN
       case EmptyForm => scala.Double.NaN
       case _ => println("wrong AF! " + aa.getClass()); scala.Double.NaN
