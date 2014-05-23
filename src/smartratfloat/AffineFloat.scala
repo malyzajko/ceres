@@ -3,7 +3,6 @@ package ceres.smartratfloat
 import CenterForm._
 import ceres.common.DirectedRounding._
 import ceres.common.{Interval, NormalInterval, EmptyInterval}
-//import java.lang.Math.{nextUp}
 import scala.Double.{PositiveInfinity => PlusInf, NegativeInfinity => MinusInf}
 
 import scala.math.{ScalaNumericConversions, ScalaNumber}

@@ -1,6 +1,5 @@
 package ceres.smartratfloat
 
-//import ceres.common.DDouble
 import ceres.common.Rational
 
 object BasicQueue {
@@ -127,29 +126,10 @@ class Queue extends BasicQueue[Rational, Deviation] {
       elements = tmp
     }
 
-    /*var i = 0
-    val dcomesFrom = d.comesFrom
-    while(i < tail) {
-      val currElem = elements(i)
-      if(compareArray(dcomesFrom, currElem.comesFrom)) {
-        currElem.value = DDouble.add(currElem.value, d.value)
-        return
-      }
-      i += 1
-    }*/
     //index not found
     elements(tail) = d
     tail += 1
   }
-
-  /*private def compareArray(a1: Array[Int], a2: Array[Int]): Boolean = {
-    var i = 0
-    while(i < comesFromArraySize && a1(i) != 0) {
-      if(a1(i) != a2(i)) return false
-      i += 1
-    }
-    if(i > 0) return true else return false
-  }*/
 
   /**
    * Creates a new (deep) copy of this queue and adds a new element.
