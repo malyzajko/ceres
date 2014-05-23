@@ -172,7 +172,8 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
         return FullForm
       }
       var (deviation, delta) = multiplyQueuesUncertain(x0, xnoise, y0, ynoise)
-      deviation = computeEtaSmart(deviation, xnoise, ynoise)
+      val eta = computeEta(xnoise, ynoise)
+      delta = addUp(delta, eta)
 
       val roundoff = getRoundoff(z0, deviation)
       delta = addUp(delta, roundoff)
@@ -198,8 +199,8 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
 
   def /(other: AffineForm): AffineForm = other match {
     case y: GeneralForm =>
-      val (yloD, yhiD) = (y.smartInterval.xlo, y.smartInterval.xhi)
-      val (ylo: Array[Double], yhi: Array[Double]) = y.smartIntervalExt
+      val (yloD, yhiD) = (y.interval.xlo, y.interval.xhi)
+      val (ylo: Array[Double], yhi: Array[Double]) = y.intervalExt
 
       if(yloD <= 0.0 && yhiD >= 0.0) {
         return FullForm
@@ -244,9 +245,9 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
 
 
   def squareRoot: AffineForm = {
-    var (ad, bd) = (smartInterval.xlo, smartInterval.xhi)
+    var (ad, bd) = (interval.xlo, interval.xhi)
     if(bd < 0.0) return EmptyForm
-    if(bd == PlusInf) return interval2affine(this.smartInterval.squareRoot, true)
+    if(bd == PlusInf) return interval2affine(this.interval.squareRoot, true)
 
     if(xnoise.size == 0) { //exact
       val sqrt = math.sqrt(x0)
@@ -254,7 +255,7 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
       return GeneralForm(sqrt, new Queue(new Noise(newIndex, r)), new Queue(new Noise(newIndex, r)))
     }
 
-    var (a: DD, b: DD) = smartIntervalExt
+    var (a: DD, b: DD) = intervalExt
     val (alpha, dmin, dmax) = computeSqrtApproximation(a, ad, b, bd)
     val errorMultiplier = div(Array(0.5, 0.0),  sqrt(a))  //wir sind gea* wenn a == 0...
     val zeta = computeZeta(dmin, dmax)
@@ -266,10 +267,10 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
   def ln: AffineForm = {
     if(xnoise.size == 0) return computeExactResult(x0, math.log )
 
-    val (ad, bd) = (smartInterval.xlo, smartInterval.xhi)
+    val (ad, bd) = (interval.xlo, interval.xhi)
     if(ad <= 0.0 || bd < 0.0 || bd == PlusInf) return FullForm
 
-    var (a: DD, b: DD) = smartIntervalExt
+    var (a: DD, b: DD) = intervalExt
     val (alpha, dmin, dmax) = computeLnApproximation(a, ad, b, bd)
     val errorMultiplier = div(one , a)
     var zeta = computeZeta(dmin, dmax)
@@ -280,11 +281,11 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
 
   def exponential: AffineForm = {
     if(xnoise.size == 0) return computeExactResult(x0, math.exp )
-    var (a: DD, b: DD) = smartIntervalExt
+    var (a: DD, b: DD) = intervalExt
 
     if(b(0) == PlusInf) return FullForm
 
-    var (ad: Double, bd: Double) = (smartInterval.xlo, smartInterval.xhi)
+    var (ad: Double, bd: Double) = (interval.xlo, interval.xhi)
     val (alpha, dmin, dmax) = computeExpApproximation(a, ad, b, bd)
     val errorMultiplier = Array(u1(math.exp(bd)), 0.0)
     var zeta = computeZeta(dmin, dmax)
@@ -304,15 +305,15 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
 
     if(xnoise.size == 0) return computeExactResult(x0, math.cos )
 
-    var (xlo, xhi) = (smartInterval.xlo, smartInterval.xhi)
-    var (xloExt, xhiExt) = smartIntervalExt
+    var (xlo, xhi) = (interval.xlo, interval.xhi)
+    var (xloExt, xhiExt) = intervalExt
 
     //let's use the symmetry, there is something funny going on for [-2.8, -0.5]
     if(xhi < 0.0) return (-this).cosine
 
     val (alpha, dmin, dmax) = computeCosineApproximation(xlo, xloExt, xhi, xhiExt)
     if (alpha == null)
-      return interval2affine(smartInterval.cosine, false)
+      return interval2affine(interval.cosine, false)
 
     val alpha2 = Array(- math.sin(xhi), 0.0)
     val errorMultiplier = if(greaterEq(abs(alpha), abs(alpha2))) alpha else alpha2
@@ -336,15 +337,15 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
 
     if(xnoise.size == 0) return computeExactResult(x0, math.sin )
 
-    var (xlo, xhi) = (smartInterval.xlo, smartInterval.xhi)
-    var (xloExt, xhiExt) = smartIntervalExt
+    var (xlo, xhi) = (interval.xlo, interval.xhi)
+    var (xloExt, xhiExt) = intervalExt
 
     //use symmetry, cause there is something funny going on for [-2.9, -0.5]
     if(xhi < 0.0) return -((-this).sine)
 
     val (alpha, dmin, dmax) = computeSineApproximation(xlo, xloExt, xhi, xhiExt)
     if (alpha == null)
-      return interval2affine(smartInterval.sine, false)
+      return interval2affine(interval.sine, false)
 
     val alpha2 = Array(math.cos(xhi), 0.0)
     val errorMultiplier = if(greaterEq(abs(alpha), abs(alpha2))) alpha else alpha2
@@ -362,13 +363,13 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
     }
     if(xnoise.size == 0) return computeExactResult(x0, math.tan )
 
-    var (xlo, xhi) = (smartInterval.xlo, smartInterval.xhi)
-    var (xloExt, xhiExt) = smartIntervalExt
+    var (xlo, xhi) = (interval.xlo, interval.xhi)
+    var (xloExt, xhiExt) = intervalExt
 
     val (alpha, dmin, dmax, k, errorMultiplier) =
         computeTanApproximation(xlo, xloExt, xhi, xhiExt)
     if (alpha(0) != alpha(0)) return FullForm
-    else if (alpha == null) return interval2affine(smartInterval.tangent, false)
+    else if (alpha == null) return interval2affine(interval.tangent, false)
 
     var zeta = computeZeta(dmin, dmax)
     var delta = computeDelta(zeta, dmin, dmax)
@@ -382,14 +383,14 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
 
 
   def arccosine: AffineForm = {
-    var (a, b) = (smartInterval.xlo, smartInterval.xhi)
-    var (aExt, bExt) = smartIntervalExt
+    var (a, b) = (interval.xlo, interval.xhi)
+    var (aExt, bExt) = intervalExt
 
     if(b < -1.0 || a > 1.0) return EmptyForm
     if(a == b) return computeExactResult(x0, math.acos )
     //straddling turning point
     if(a < 0.0 && b > 0.0) {
-      return interval2affine(smartInterval.arccosine, false)
+      return interval2affine(interval.arccosine, false)
     }
 
     //again, something funny going on here
@@ -405,14 +406,14 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
 
 
   def arcsine: AffineForm = {
-    var (a, b) = (smartInterval.xlo, smartInterval.xhi)
-    var (aExt, bExt) = smartIntervalExt
+    var (a, b) = (interval.xlo, interval.xhi)
+    var (aExt, bExt) = intervalExt
 
     if(b < -1.0 || a > 1.0) return EmptyForm
     if(a == b) return computeExactResult(x0, math.asin )
     //straddling turning point
     if(a < 0.0 && b > 0.0) {
-      return interval2affine(smartInterval.arcsine, false)
+      return interval2affine(interval.arcsine, false)
     }
 
     val (alpha, dmin, dmax, errorMultiplier) =
@@ -425,13 +426,13 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
 
 
   def arctangent: AffineForm = {
-    var (a, b) = (smartInterval.xlo, smartInterval.xhi)
-    var (aExt, bExt) = smartIntervalExt
+    var (a, b) = (interval.xlo, interval.xhi)
+    var (aExt, bExt) = intervalExt
 
     if(a == b) return computeExactResult(x0, math.atan )
     //straddling turning point
     if(a < 0.0 && b > 0.0) {
-      return interval2affine(smartInterval.arctangent, false)
+      return interval2affine(interval.arctangent, false)
     }
 
     val (alpha, dmin, dmax, errorMultiplier) =
@@ -478,8 +479,8 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
       d =  addUp(d,  rdOff(zi))
       if(notZero(zi))
         xi match {
-          case n:Noise => deviation += new Noise(xi.index, zi, xi.comesFrom)
-          case u:Uncertainty => deviation += new Uncertainty(xi.index, zi, xi.comesFrom)
+          case n:Noise => deviation += new Noise(xi.index, zi)
+          case u:Uncertainty => deviation += new Uncertainty(xi.index, zi)
         }
     }
     if(d(0) == PlusInf) {
@@ -503,7 +504,7 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
       val xi = iter.next
       val zi =  mult(alpha , xi.value)
       d =  addUp(d,  rdOff(zi))
-      if(notZero(zi)) deviation :+ new Noise(xi.index, zi, xi.comesFrom)
+      if(notZero(zi)) deviation :+ new Noise(xi.index, zi)
     }
     return (deviation, d)
   }
@@ -524,32 +525,6 @@ case class GeneralForm(x0: Double, var xnoise: Queue, var xerror: Queue) extends
         val r = if(exact) getRoundoff(x0_new, xk) else getRoundoff1(x0_new, xk)
         return new GeneralForm(x0_new, xk, new Queue(new Noise(newIndex, r)))
       }
-  }
-
-
-
-  //############# QUADRATIC OPTIMIZATION ####################
-  // !!! Note: this is not smart anymore !!!
-  lazy val smartMinMaxRadius: (DD, DD) = {
-    //sumQueueSmart(xnoise)
-    val radius = sumQueue(xnoise)
-    (Array(-radius(0), -radius(1)), radius)
-  }
-
-  lazy val smartIntervalExt: (DD, DD) = {
-    val (lo, hi) = smartMinMaxRadius
-    (addDown(x0, 0.0, lo(0), lo(1)), addUp(x0, 0.0, hi(0), hi(1)))
-  }
-
-  lazy val smartInterval: Interval = {
-    val lo = addD(smartIntervalExt._1(0), smartIntervalExt._1(1))
-    val hi = addU(smartIntervalExt._2(0), smartIntervalExt._2(1))
-    NormalInterval(lo, hi)
-  }
-
-  lazy val smartRadius: DD = {
-    val (lo, hi) = smartMinMaxRadius
-    max(abs(lo), abs(hi))
   }
 
 }

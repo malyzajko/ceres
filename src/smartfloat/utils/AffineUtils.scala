@@ -94,108 +94,12 @@ object AffineUtils {
   /* ####################################################################
     #####################    Smart Intervals     #########################
      ####################################################################*/
-  //@return returns the min and max values of this queue
-  def sumQueueSmart(queue: Queue): (Array[Double], Array[Double]) = {
-
-    var sumQuadratic = zero
-    var sumNoise = zero
-    var dev = Queue.empty
-
-    val iter = queue.getIterator
-
-    while(iter.hasNext) {
-      val xi = iter.next
-      if(xi.doubleValue < smartPackingThreshold) sumNoise = addUp(sumNoise, abs(xi.value))
-      else dev :+ xi
-    }
-
-
-    if(dev.size > smartQueueLimit) {
-      val before = dev.size
-      var newQueue = packNoiseSymbolsStdDevWithUncertainty(dev, smartPackingFactor, smartPackingAvrgScale)
-      if(newQueue.size > smartQueueLimit)
-        newQueue = packNoiseSymbolsStdDevWithUncertainty(newQueue, 2.0*smartPackingFactor, smartPackingAvrgScale)
-      if(printPackingInfo) println("--------> smartMinMaxradius packed from " + before + " to: " + newQueue.size)
-      dev = newQueue
-    }
-
-    if(dev.size > smartQueueLimit) {
-      val sum = sumQueue(queue) //worst case
-      return (Array(-sum(0), -sum(1)), sum)
-    }
-
-    var map: HashMap[Int, Double] = HashMap.empty
-    val devIter = dev.getIterator
-    while (devIter.hasNext){
-      map ++= devIter.next.getInitialMap
-    }
-
-    var (resLo, resHi) = computeRadius(map, dev)
-    resLo = addDown(sumQuadratic, subDown(resLo, sumNoise))
-    resHi = addUp(sumQuadratic, addUp(resHi, sumNoise))
-    (resLo, resHi)
-  }
-
-
-  //@return (neg. radius, pos. radius)
-  private def computeRadius(m: HashMap[Int, Double], dev: Queue): (Array[Double], Array[Double]) = {
-    val nan = m.find((p:(Int, Double)) => p._2 != p._2);  //find not assigned yet
-
-    nan match {
-      case Some((key:Int, value:Double)) =>  //its convex, so try only max and min values
-        val (aMin, aMax) = computeRadius(m + (key -> 1.0), dev)
-        val (cMin, cMax) = computeRadius(m + (key -> 0.0), dev)
-        val (bMin, bMax) = computeRadius(m + (key -> -1.0), dev)
-        return (min(aMin, min(cMin, bMin)), max(aMax, max(cMax, bMax)))
-      case None =>
-        val value = evalRadius(m, dev: Queue)
-        return (value, value)
-    }
-  }
-
-  private def evalRadius(m: HashMap[Int, Double], dev: Queue): Array[Double] = {
-    var sum = zero
-    val elemX = dev.elements
-    var i = 0
-    while (i < dev.tail) {
-      val xi = elemX(i)
-      sum = add(sum, mult(Array(xi.computeFactor(m), 0.0), xi.value))
-      i += 1
-    }
-    sum
-  }
+  // TODO: we can still try the quadratic optimization, i.e. with ei * ei being positiv
 
 
      /* ####################################################################
     #####################    Eta computation     #########################
      ####################################################################*/
-  def computeEtaSmart(dev: Queue, xq: Queue, yq: Queue): Queue = {
-    var sum = zero
-    val elemX = xq.elements
-    val elemY = yq.elements
-
-    var i = 0
-    while (i < xq.tail) {
-      val xi = elemX(i)
-      var j = 0
-      while (j < yq.tail) {
-        val yj = elemY(j)
-        if((xi.filled + yj.filled) >= 8) {
-          sum = add(sum, abs(mult(xi.value, yj.value)))
-        }
-        else if(xi.index == yj.index) {
-          dev :<+ new Noise(newIndex, mult(xi.value, yj.value), xi, yj)
-        }
-        else {
-          dev :<+ new Noise(newIndex, mult(xi.value, yj.value), xi, yj)
-        }
-        j += 1
-      }
-      i += 1
-    }
-    if(notZero(sum)) dev :+ new Noise(newIndex, sum)
-    dev
-  }
 
   def computeEta(xnoise: Queue, ynoise: Queue): Array[Double] = {
     var delta = zero
@@ -228,40 +132,23 @@ object AffineUtils {
   def getRoundoff(xn: Double, xqueue:Queue): Array[Double] = {
     if(xqueue.size == 0) return zero
 
-    if(smartRoundoffComputation) {
-      //these are signed!
-      var (minVal, maxVal) = sumQueueSmart(xqueue)
-      val zlo = abs(addDown(xn, 0.0, minVal(0), minVal(1)))
-      val zhi = abs(addUp(xn, 0.0, maxVal(0), maxVal(1)))
-      val m = max(zlo, zhi)
-      return multUp(m, Array(ulp, 0.0))
-    }
-    else {
-      var sum = sumQueue(xqueue)
-      val zlo = abs(subDown(xn, 0.0, sum(0), sum(1)))
-      val zhi = abs(addUp(xn, 0.0, sum(0), sum(1)))
-      val m = max(zlo, zhi)
-      return multUp(m, Array(ulp, 0.0))
-    }
+    var sum = sumQueue(xqueue)
+    val zlo = abs(subDown(xn, 0.0, sum(0), sum(1)))
+    val zhi = abs(addUp(xn, 0.0, sum(0), sum(1)))
+    val m = max(zlo, zhi)
+    return multUp(m, Array(ulp, 0.0))
+    
   }
 
   def getRoundoff1(xn: Double, xqueue:Queue): Array[Double] = {
-    if(smartRoundoffComputation) {
-      var (minVal, maxVal) = sumQueueSmart(xqueue)
-      val zlo = abs(addDown(xn, 0.0, minVal(0), minVal(1)))
-      val zhi = abs(addUp(xn, 0.0, maxVal(0), maxVal(1)))
+    
+    var sum = sumQueue(xqueue)
+    val zlo = abs(subDown(xn, 0.0, sum(0), sum(1)))
+    val zhi = abs(addUp(xn, 0.0, sum(0), sum(1)))
 
-      val m = max(zlo, zhi)
-      return multUp(m, Array(2*ulp, 0.0))
-    }
-    else {
-      var sum = sumQueue(xqueue)
-      val zlo = abs(subDown(xn, 0.0, sum(0), sum(1)))
-      val zhi = abs(addUp(xn, 0.0, sum(0), sum(1)))
-
-      val m = max(zlo, zhi)
-      return multUp(m, Array(2*ulp, 0.0))
-    }
+    val m = max(zlo, zhi)
+    return multUp(m, Array(2*ulp, 0.0))
+    
   }
 
 
@@ -526,7 +413,7 @@ object AffineUtils {
       val zi =  add(xi.value, yi.value)
       delta =  addUp(delta,  rdOff(zi))
       if(zi(0) != 0.0 || zi(1) != 0.0) {
-        deviation :+ new Noise(xi.index, zi, xi.comesFrom)
+        deviation :+ new Noise(xi.index, zi)
       }
     }
     DoubleQueueIterator.iterate[Array[Double], Deviation](iterX, iterY, new Noise(Int.MaxValue, 0.0),
@@ -549,8 +436,8 @@ object AffineUtils {
       delta =  addUp(delta,  rdOff(zi))
       if(zi(0) != 0.0 || zi(1) != 0.0) {
         xi match {
-          case n:Noise => deviation :+ new Noise(xi.index, zi, xi.comesFrom)
-          case u:Uncertainty => deviation :+ new Uncertainty(xi.index, zi, xi.comesFrom)
+          case n:Noise => deviation :+ new Noise(xi.index, zi)
+          case u:Uncertainty => deviation :+ new Uncertainty(xi.index, zi)
         }
       }
     }
@@ -617,7 +504,7 @@ object AffineUtils {
       val zi =  sub(xi.value, yi.value)
       delta =  addUp(delta,  rdOff(zi))
       if(zi(0) != 0.0 || zi(1) != 0.0) {
-        deviation :+ new Noise(xi.index, zi, xi.comesFrom)
+        deviation :+ new Noise(xi.index, zi)
       }
     }
     DoubleQueueIterator.iterate[Array[Double], Deviation](iterX, iterY, new Noise(Int.MaxValue, 0.0),
@@ -639,8 +526,8 @@ object AffineUtils {
       delta =  addUp(delta,  rdOff(zi))
       if(zi(0) != 0.0 || zi(1) != 0.0) {
         xi match {
-          case n:Noise => deviation :+ new Noise(xi.index, zi, xi.comesFrom)
-          case u:Uncertainty => deviation :+ new Uncertainty(xi.index, zi, xi.comesFrom)
+          case n:Noise => deviation :+ new Noise(xi.index, zi)
+          case u:Uncertainty => deviation :+ new Uncertainty(xi.index, zi)
         }
       }
     }
@@ -706,18 +593,18 @@ object AffineUtils {
     val fx = (d: Deviation) => {
       val zi =  mult(b, 0.0, d.value(0), d.value(1))
       delta =  addUp(delta,  rdOff(zi))
-      if(zi(0) != 0.0 || zi(1) != 0.0) deviation :+ new Noise(d.index, zi, d.comesFrom)
+      if(zi(0) != 0.0 || zi(1) != 0.0) deviation :+ new Noise(d.index, zi)
     }
     val fy = (d: Deviation) => {
       val zi =  mult(a, 0.0, d.value(0), d.value(1))
       delta =  addUp(delta,  rdOff(zi))
-      if(zi(0) != 0.0 || zi(1) != 0.0) deviation :+ new Noise(d.index, zi, d.comesFrom)
+      if(zi(0) != 0.0 || zi(1) != 0.0) deviation :+ new Noise(d.index, zi)
     }
     val fCouple = (xi: Deviation, yi: Deviation) => {
       val zi =  add( mult(b, 0.0, xi.value(0), xi.value(1)),
             mult(a, 0.0, yi.value(0), yi.value(1)))
       delta =  addUp(delta,  rdOff(zi))// Fixme: this should be rdOffABplusCD
-      if(zi(0) != 0.0 || zi(1) != 0.0) deviation :+ new Noise(xi.index, zi, xi.comesFrom)
+      if(zi(0) != 0.0 || zi(1) != 0.0) deviation :+ new Noise(xi.index, zi)
     }
     DoubleQueueIterator.iterate[Array[Double], Deviation](iterX, iterY, new Noise(Int.MaxValue, 0.0), fx, fy, fCouple)
     return(deviation, delta)
@@ -734,8 +621,8 @@ object AffineUtils {
       delta =  addUp(delta,  rdOff(zi))
       if(zi(0) != 0.0 || zi(1) != 0.0)
         d match {
-          case n:Noise => deviation :+ new Noise(d.index, zi, d.comesFrom)
-          case u:Uncertainty => deviation :+ new Uncertainty(d.index, zi, d.comesFrom)
+          case n:Noise => deviation :+ new Noise(d.index, zi)
+          case u:Uncertainty => deviation :+ new Uncertainty(d.index, zi)
         }
     }
     val fy = (d: Deviation) => {
@@ -743,8 +630,8 @@ object AffineUtils {
       delta =  addUp(delta,  rdOff(zi))
       if(zi(0) != 0.0 || zi(1) != 0.0)
         d match {
-          case n:Noise => deviation :+ new Noise(d.index, zi, d.comesFrom)
-          case u:Uncertainty => deviation :+ new Uncertainty(d.index, zi, d.comesFrom)
+          case n:Noise => deviation :+ new Noise(d.index, zi)
+          case u:Uncertainty => deviation :+ new Uncertainty(d.index, zi)
         }
     }
     val fCouple = (xi: Deviation, yi: Deviation) => {
@@ -753,8 +640,8 @@ object AffineUtils {
       delta =  addUp(delta,  rdOff(zi))// Fixme: this should be rdOffABplusCD
       if(zi(0) != 0.0 || zi(1) != 0.0)
         xi match {
-          case n:Noise => deviation :+ new Noise(xi.index, zi, xi.comesFrom)
-          case u:Uncertainty => deviation :+ new Uncertainty(xi.index, zi, xi.comesFrom)
+          case n:Noise => deviation :+ new Noise(xi.index, zi)
+          case u:Uncertainty => deviation :+ new Uncertainty(xi.index, zi)
         }
     }
     DoubleQueueIterator.iterate[Array[Double], Deviation](iterX, iterY, new Noise(Int.MaxValue, 0.0), fx, fy, fCouple)

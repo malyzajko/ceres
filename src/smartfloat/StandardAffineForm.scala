@@ -53,8 +53,8 @@ object AForm {
       d =  addUp(d,  rdOff(zi))
       if(zi(0) != 0.0 || zi(1) != 0.0) 
         xi match {
-          case n:Noise => deviation += new Noise(xi.index, zi, xi.comesFrom)
-          case u:Uncertainty => deviation += new Uncertainty(xi.index, zi, xi.comesFrom)
+          case n:Noise => deviation += new Noise(xi.index, zi)
+          case u:Uncertainty => deviation += new Uncertainty(xi.index, zi)
         }
     }
     if(d(0) == PlusInf) return FullForm
@@ -183,9 +183,9 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
   def /(other: AffineForm): AffineForm = other match {
     case y: AForm =>
-      val (yloD, yhiD) = (y.smartInterval.xlo, y.smartInterval.xhi)
+      val (yloD, yhiD) = (y.interval.xlo, y.interval.xhi)
 
-      val (ylo: Array[Double], yhi: Array[Double]) = y.smartIntervalExt
+      val (ylo: Array[Double], yhi: Array[Double]) = y.intervalExt
 
       if(yloD <= 0.0 && yhiD >= 0.0) return FullForm  //division by zero
 
@@ -214,17 +214,17 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
   }
 
   def squareRoot: AffineForm = {
-    var (ad, bd) = (smartInterval.xlo, smartInterval.xhi)
+    var (ad, bd) = (interval.xlo, interval.xhi)
 
     if(bd < 0.0) return EmptyForm
-    if(bd == PlusInf) return interval2affine(this.smartInterval.squareRoot)
+    if(bd == PlusInf) return interval2affine(this.interval.squareRoot)
 
     if(xnoise.size == 0) { //exact
       val sqrt = math.sqrt(x0)
       return new AForm(sqrt, new Queue(new Noise(newIndex, DirRound.roundOff(sqrt))))
     }
 
-    var (a: Array[Double], b: Array[Double]) = smartIntervalExt
+    var (a: Array[Double], b: Array[Double]) = intervalExt
 
     if(ad < 0.0) {ad = 0.0; a = Array(0.0, 0.0)}
 
@@ -243,13 +243,13 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
   def ln: AffineForm = {
     if(xnoise.size == 0) return computeExactResultStd(x0, math.log)
 
-    val ad = smartInterval.xlo
-    val bd = smartInterval.xhi
+    val ad = interval.xlo
+    val bd = interval.xhi
 
     if(ad <= 0.0 || bd < 0.0 || bd == PlusInf)
       return FullForm
 
-    var (a: Array[Double], b: Array[Double]) = smartIntervalExt
+    var (a: Array[Double], b: Array[Double]) = intervalExt
 
     val alpha =  div(Array(1.0, 0.0) , b)
     val dmin =  subDown(Array(d1(math.log(ad)), 0.0),   multUp(alpha,a))
@@ -265,7 +265,7 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
     if(interval.xhi == PlusInf) return FullForm
     if(xnoise.size == 0) return computeExactResultStd(x0, math.exp)
 
-    var (a: Array[Double], b: Array[Double]) = smartIntervalExt
+    var (a: Array[Double], b: Array[Double]) = intervalExt
     val expA = Array(d1(math.exp(interval.xlo)), 0.0)
     val expB = Array(u1(math.exp(interval.xhi)), 0.0)
 
@@ -286,8 +286,8 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
     if(xnoise.size == 0) return computeExactResultStd(x0, math.cos)
 
-    var (xlo, xhi) = (smartInterval.xlo, smartInterval.xhi)
-    var (xloExt, xhiExt) = smartIntervalExt
+    var (xlo, xhi) = (interval.xlo, interval.xhi)
+    var (xloExt, xhiExt) = intervalExt
 
     //let's use the symmetry, there is something funny going on for [-2.8, -0.5]
     if(xhi < 0.0) return (-this).cosine
@@ -331,7 +331,7 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
     }
     else {
-      return interval2affine(smartInterval.cosine)
+      return interval2affine(interval.cosine)
     }
 
   }
@@ -344,8 +344,8 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
     if(xnoise.size == 0) return computeExactResultStd(x0, math.sin)
 
-    var (xlo, xhi) = (smartInterval.xlo, smartInterval.xhi)
-    var (xloExt, xhiExt) = smartIntervalExt
+    var (xlo, xhi) = (interval.xlo, interval.xhi)
+    var (xloExt, xhiExt) = intervalExt
 
     //use symmetry, cause there is something funny going on for [-2.9, -0.5]
     if(xhi < 0.0) return -((-this).sine)
@@ -387,7 +387,7 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
     }
     else {
-      return interval2affine(smartInterval.sine)
+      return interval2affine(interval.sine)
     }
 
 
@@ -401,8 +401,8 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
     if(xnoise.size == 0) return computeExactResultStd(x0, math.tan)
 
-    var (xlo, xhi) = (smartInterval.xlo, smartInterval.xhi)
-    var (xloExt, xhiExt) = smartIntervalExt
+    var (xlo, xhi) = (interval.xlo, interval.xhi)
+    var (xloExt, xhiExt) = intervalExt
 
     val ka = if(xlo > 0.0) divD(2.0*xlo, Pi_up) else divD(2.0*xlo, Pi_down)
     val kb = if(xhi > 0.0) divU(2.0*xhi, Pi_down) else divU(2.0*xhi, Pi_up)
@@ -445,7 +445,7 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
       return unaryOp(x0_new, xnoise, alpha, zeta, delta)
     }
     else if(n-m == 2.0) {
-      return interval2affine(smartInterval.tangent)
+      return interval2affine(interval.tangent)
     }
     else {
       FullForm
@@ -454,8 +454,8 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
 
   def arccosine: AffineForm = {
-    var (a, b) = (smartInterval.xlo, smartInterval.xhi)
-    var (aExt, bExt) = smartIntervalExt
+    var (a, b) = (interval.xlo, interval.xhi)
+    var (aExt, bExt) = intervalExt
 
     if(b < -1.0 || a > 1.0)
       return EmptyForm
@@ -463,7 +463,7 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
     if(a == b) return computeExactResultStd(x0, math.acos)
 
     if(a < 0.0 && b > 0.0) {
-      return interval2affine(smartInterval.arccosine)
+      return interval2affine(interval.arccosine)
     }
 
     val one = Array(1.0, 0.0)
@@ -494,8 +494,8 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
   def arcsine: AffineForm = {
 
-    var (a, b) = (smartInterval.xlo, smartInterval.xhi)
-    var (aExt, bExt) = smartIntervalExt
+    var (a, b) = (interval.xlo, interval.xhi)
+    var (aExt, bExt) = intervalExt
 
     if(b < -1.0 || a > 1.0)
       return EmptyForm
@@ -503,7 +503,7 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
     if(a == b) return computeExactResultStd(x0, math.asin)
 
     if(a < 0.0 && b > 0.0) {
-      return interval2affine(smartInterval.arcsine)
+      return interval2affine(interval.arcsine)
     }
 
     val one = Array(1.0, 0.0)
@@ -530,13 +530,13 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
 
   def arctangent: AffineForm = {
-    var (a, b) = (smartInterval.xlo, smartInterval.xhi)
-    var (aExt, bExt) = smartIntervalExt
+    var (a, b) = (interval.xlo, interval.xhi)
+    var (aExt, bExt) = intervalExt
 
     if(a == b) return computeExactResultStd(x0, math.atan)
 
     if(a < 0.0 && b > 0.0) {
-      return interval2affine(smartInterval.arctangent)
+      return interval2affine(interval.arctangent)
     }
 
     val one = Array(1.0, 0.0)
@@ -556,27 +556,6 @@ case class AForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
     return unaryOp(x0, xnoise, alpha, zeta, delta)
 
-  }
-
-  //############# QUADRATIC OPTIMIZATION ####################
-  lazy val smartMinMaxRadius: (Array[Double], Array[Double]) = {
-    sumQueueSmart(xnoise)
-  }
-
-  lazy val smartIntervalExt: (Array[Double], Array[Double]) = {
-    val (lo, hi) = smartMinMaxRadius
-    (addDown(x0, 0.0, lo(0), lo(1)), addUp(x0, 0.0, hi(0), hi(1)))
-  }
-
-  lazy val smartInterval: Interval = {
-    val lo = addD(smartIntervalExt._1(0), smartIntervalExt._1(1))
-    val hi = addU(smartIntervalExt._2(0), smartIntervalExt._2(1))
-    NormalInterval(lo, hi)
-  }
-
-  lazy val smartRadius: Array[Double] = {
-    val (lo, hi) = smartMinMaxRadius
-    max(abs(lo), abs(hi))
   }
 
 
