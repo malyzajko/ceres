@@ -25,7 +25,7 @@ object NBody {
     return (end - start)
   }
 
-  def affineSimulate(N: Int, dt: Double) = () => {
+  def affineSimulate(N: Int, dt: Double) = {
     var n = N
     AffineJovianSystem.reset
     //println("energy before: " + AffineJovianSystem.energy)
@@ -33,7 +33,7 @@ object NBody {
     AffineJovianSystem.energy;
   }
   
-  def intervalSimulate(N: Int, dt: Double) = () => {
+  def intervalSimulate(N: Int, dt: Double) = {
     var n = N
     IntervalJovianSystem.reset
     //println("energy before: " + IntervalJovianSystem.energy)
@@ -41,7 +41,7 @@ object NBody {
     IntervalJovianSystem.energy;
   }
 
-  def smartSimulate(N: Int, dt: Double) = () => {
+  def smartSimulate(N: Int, dt: Double) = {
     var n = N
     SmartJovianSystem.reset
     while (n > 0) {  SmartJovianSystem.advance(dt);  n -= 1 ;}  

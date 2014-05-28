@@ -153,7 +153,7 @@ class AffineFloat(val d: Double, val aa: AffineForm) extends ScalaNumber
     aa match {
       case FullForm => str += " (not computable)"
       case EmptyForm => str += " (not computable)"
-      case _ => str += " (" + doubleFormat.format(relError) + ")"
+      case _ => str += "(abs: "+doubleFormat.format(absError)+") (rel: " + doubleFormat.format(relError) + ")"
     }
     str
   }

@@ -10,11 +10,13 @@ import scala.collection.mutable.LinkedList
  */
 object PaperExamples extends App {
 
-  //dopplerEffect
+  quadraticEquation
 
-  //bSplines(SmartFloat(0.5, 0.5))
+  quadraticEquationSmart
 
-  cubeRoot
+  //triangleExampleSection
+
+  //cubeRoot
   
   /**
    * Computes the cube root of 10 by Halley's method.
@@ -237,32 +239,41 @@ object PaperExamples extends App {
   
     println("smarter r1 = " + rk1.toStringWithErrors + " , r2 = " + rk2.toStringWithErrors)
   }
-  
-  
-  /**
-   * Computes the frequency shift from doppler effect. 
-   * Parameters need to be tweaked a bit to get the best result:
-   * maxNoiseCount = 200, smartQueueLimit = 23, packingFactor = 0.0, packingAvrgScale = 0.50,
-   * smartPackingFactor = 0.0, smartPackingAvrgScale = 1.0
-   */
-  def dopplerEffect = {
+
+  def quadraticEquationSmart {
     import SmartFloat._
+        
+    // var a = SmartFloat(2.999)
+    // var b = SmartFloat(56.0001)
+    // var c = SmartFloat(1.00074)
+
+    var a = SmartFloat(2.999, 0.5)
+    var b = SmartFloat(56.0001, 0.5)
+    var c = SmartFloat(1.00074, 0.5)
+    val discr = b*b - a * c * 4.0
+      
+    //classical way
+    var r2 = (-b + sqrt(discr))/(a * 2.0)
+    var r1 = (-b - sqrt(discr))/(a * 2.0)
+    println("classic r1 = " + r1.toStringWithErrors + 
+                 " , r2 = " + r2.toStringWithErrors)
     
-    val T = SmartFloat(10.0, 40.0)
-    val v = SmartFloat(10010.0, 9990.0)
-    val u = SmartFloat(0.0, 100.0)
-    val q1 = SmartFloat(331.4) + T*0.6
-    val q2 = q1 * v
-    val q3 = q1 + u
-    val q4 = q3 * q3
-    val z = q2/q4
+    //smarter way
+    val (rk1: SmartFloat, rk2: SmartFloat) = 
+    if(b*b - a*c > 10.0) {  
+      if(b > 0.0) ((-b - sqrt(discr))/(a * 2.0), c * 2.0 /(-b - sqrt(discr)))
+      else if(b < 0.0)  (c * 2.0 /(-b + sqrt(discr)), (-b + sqrt(discr))/(a * 2.0))
+      else  ((-b - sqrt(discr))/(a * 2.0), (-b + sqrt(discr))/(a * 2.0))
+    }
+    else {
+      ((-b - sqrt(discr))/(a * 2.0), (-b + sqrt(discr))/(a * 2.0))
+    }
   
-    println("q1: " + q1.toStringWithAbsErrors)
-    println("q2: " + q2.toStringWithAbsErrors)
-    println("q3: " + q3.toStringWithAbsErrors)
-    println("q4: " + q4.toStringWithAbsErrors)
-    println("z: " + z.toStringWithAbsErrors)
+    println("smarter r1 = " + rk1.toStringWithErrors + " , r2 = " + rk2.toStringWithErrors)
   }
+  
+  
+  
   
   
   
@@ -284,7 +295,7 @@ object PaperExamples extends App {
 
   
   /**
-   * This is not in the paper, but fun. Just try...
+   * This is not in the paper, but fun.
    */
   def rumpsFunction = {
     import AffineFloat._
@@ -297,32 +308,6 @@ object PaperExamples extends App {
   
   }
   
-  //true ranges are:= for u \in [0, 1]
-  def bSplines(u: SmartFloat) = {
-    
-    //val u = SmartFloat(0.75, 0.25)
-    //val u = SmartFloat(0.25, 0.25)
-    
-    val oneMinusU = SmartFloat(1.0) - u
-    
-    val b0 = (oneMinusU * oneMinusU * oneMinusU)/6.0
-  
-    val b1 = (u*u*u*3 - u*u*6 + 4.0)/6.0
-  
-    val b2 = (u*u*u*(-3.0) + u*u*3 + u*3 + 1)/6.0
-    
-    val b3 = (-u*u*u)/6.0
-    /*val b0 = u
-    val b1 = u*u
-    val b2 = u*u*u
-    
-    
-    */
-    println("b0: " + b0.toStringWithAbsErrors)
-    println("b1: " + b1.toStringWithAbsErrors)
-    println("b2: " + b2.toStringWithAbsErrors)
-    println("b3: " + b3.toStringWithAbsErrors)
-  }
    
 }
 

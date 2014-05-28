@@ -17,8 +17,8 @@ object FFT {
   */
 
   //@return (double difference, affinefloat abs error, intervalfloat abs error)
-  def compareFFTAffineInterval(N: Int): (Double, Double, Double) = {
-    var doubleRandomVector = randomVector(2*N)
+  def compareFFTAffineInterval(N: Int, seed: Long): (Double, Double, Double) = {
+    var doubleRandomVector = randomVector(2*N, 10.0, seed)
     var affineRandomVector = aconvertArray(doubleRandomVector)
     var intervalRandomVector = iconvertArray(doubleRandomVector)
    
@@ -169,7 +169,7 @@ object FFTDouble {
       count += 1
       if(d > diffMax) diffMax = d 
     }
-    println("avrg. double difference: " + (sum/count))
+    //println("avrg. double difference: " + (sum/count))
     return diffMax
   }  
 
@@ -735,8 +735,8 @@ object IntervalFFT {
     inverse(data)
     
     
-    println("average abs.error: " + SmartRandomUtils.computeAvrgAbsError(data))
-    println("average rel.error: " + SmartRandomUtils.computeAvrgError(data))
+    //println("average abs.error: " + SmartRandomUtils.computeAvrgAbsError(data))
+    //println("average rel.error: " + SmartRandomUtils.computeAvrgError(data))
     return (SmartRandomUtils.computeMaxAbsError(data), SmartRandomUtils.computeMaxError(data))
     
     // Compute RMS difference.

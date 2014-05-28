@@ -9,22 +9,21 @@ Computes the LU factorization of a dense 100x100 matrix using partial pivoting. 
 The data size for the LARGE version of the benchmark uses a 1,000 x 1,000 matrix. 
 */
 
-trait PivotSetting {
-  val pivoting: Boolean = true
-}
 
 object DenseLU {
 
-  
+  val pivoting: Boolean = false
 
-  def doubleLU(dim: Int) = {
+  def doubleLU(dim: Int): Double = {
     val A = randomMatrix(dim, dim)
     val lu = copyMatrix(A)
     val x = randomVector(dim)
     val pivot: Array[Int] = Array.fill(dim){0}
     
     DoubleDenseLU.factor(lu, pivot)
-    DoubleDenseLU.solve(lu, pivot, x) 
+    println("pivot: " + pivot.toList)
+    //DoubleDenseLU.solve(lu, pivot, x) 
+    DoubleDenseLU.verify(A, lu, pivot)
   }
   
   def smartLU(dim: Int) = {
@@ -60,40 +59,34 @@ object DenseLU {
   /*
     Compare results for computing FFT on a random matrix of dimension dim.
 
-    @return (dbl error, affinefloat abs error, interval abs error)
+    @return (affinefloat rel error, affinefloat abs error, interval rel error, interval abs error)
   */
-  def compareLUAffineInterval(dim: Int): (Double, Double, Double) = {
-    var doubleMatrix = randomMatrix(dim, dim)
+  def compareLUAffineInterval(dim: Int, seed: Long): (Double, Double, Double, Double) = {
+    var doubleMatrix = randomSquareMatrix(dim, 10.0, seed)
     var affineMatrix = aconvertMatrix(doubleMatrix)
     var intervalMatrix = iconvertMatrix(doubleMatrix)
-
-    val A = doubleMatrix
-    val lu = copyMatrix(A)
-    val pivot: Array[Int] = Array.fill(dim){0}
-    DoubleDenseLU.factor(lu, pivot)
-    val verif = DoubleDenseLU.verify(A, lu, pivot)
     
     val sA = affineMatrix
     val slu = acopyMatrix(sA)
     val spivot: Array[Int] = Array.fill(dim){0}
     AffineDenseLU.factor(slu, spivot)
-    // TODO: why do we need this?
+    
     val sverif = AffineDenseLU.verify(sA, slu, spivot)
     
     val iA = intervalMatrix
     val ilu = icopyMatrix(iA)
     val ipivot: Array[Int] = Array.fill(dim){0}
     IntervalDenseLU.factor(ilu, ipivot)
-    // TODO: why do we need this?
+    
     val iverif = IntervalDenseLU.verify(iA, ilu, ipivot)
     
-    (verif, sverif._1, iverif._1) 
+    (sverif._1, sverif._2, iverif._1, iverif._1) 
   }
 }
 
-object DoubleDenseLU extends PivotSetting{
+object DoubleDenseLU {
   
-
+  import DenseLU.pivoting
   /**
     LU factorization (in place).
 
@@ -113,18 +106,19 @@ object DoubleDenseLU extends PivotSetting{
 
     for (j <- 0 until minMN) {
       // find pivot in column j and  test for singularity.
-      if (pivoting) {
+      
         var jp = j
         
-        var t = math.abs(A(j)(j))
-        for (i <- (j+1) until M) {
-            val ab = math.abs(A(i)(j))
-            if ( ab > t) {
-                jp = i
-                t = ab
-            }
+        if (pivoting) {
+          var t = math.abs(A(j)(j))
+          for (i <- (j+1) until M) {
+              val ab = math.abs(A(i)(j))
+              if ( ab > t) {
+                  jp = i
+                  t = ab
+              }
+          }
         }
-        
         
         pivot(j) = jp
 
@@ -140,7 +134,7 @@ object DoubleDenseLU extends PivotSetting{
             A(j) = A(jp)
             A(jp) = tA
         }
-      }
+      
  
       if (j < M-1) {                // compute elements j+1:M of jth column
           // note A(j,j), was A(jp,p) previously which was
@@ -228,9 +222,6 @@ object DoubleDenseLU extends PivotSetting{
 
 		solve(lu, pivot, x)
 		
-		RandomUtils.printArray(pivot)
-		//RandomUtils.printArray(x)
-
     return maxabs(b, matvec(A, x))
 		//val EPS = 1.0e-12
 		//if ( normabs(b, matvec(A,x)) / N > EPS )
@@ -286,9 +277,12 @@ object DoubleDenseLU extends PivotSetting{
 }// end DoubleDenseLU
 
 
-object SmartDenseLU extends PivotSetting {
+object SmartDenseLU {
   import smartfloat.SmartFloat
   import SmartFloat._
+
+
+  import DenseLU.pivoting
 
   /**
     LU factorization (in place).
@@ -309,18 +303,19 @@ object SmartDenseLU extends PivotSetting {
 
     for (j <- 0 until minMN) {
       // find pivot in column j and  test for singularity.
-      if (pivoting) {     
+       
         var jp = j
           
-          var t = abs(A(j)(j))
-          for (i <- (j+1) until M) {
-              val ab = abs(A(i)(j))
-              if ( ab > t) {
-                  jp = i
-                  t = ab
-              }
+          if (pivoting) {
+            var t = abs(A(j)(j))
+            for (i <- (j+1) until M) {
+                val ab = abs(A(i)(j))
+                if ( ab > t) {
+                    jp = i
+                    t = ab
+                }
+            }
           }
-          
           pivot(j) = jp
 
           // jp now has the index of maximum element 
@@ -335,7 +330,7 @@ object SmartDenseLU extends PivotSetting {
               A(j) = A(jp)
               A(jp) = tA
           }
-      }
+      
       if (j < M-1) {                // compute elements j+1:M of jth column
           // note A(j,j), was A(jp,p) previously which was
           // guarranteed not to be zero (Label #1)
@@ -471,9 +466,12 @@ object SmartDenseLU extends PivotSetting {
   }
 }
 
-object AffineDenseLU extends PivotSetting {
+object AffineDenseLU {
   import smartfloat.AffineFloat
   import AffineFloat._
+
+
+  import DenseLU.pivoting
 
   /**
     LU factorization (in place).
@@ -494,18 +492,19 @@ object AffineDenseLU extends PivotSetting {
 
     for (j <- 0 until minMN) {
       // find pivot in column j and  test for singularity.
-      if (pivoting) {
+      
         var jp = j
         
-        var t = abs(A(j)(j))
-        for (i <- (j+1) until M) {
-            val ab = abs(A(i)(j))
-            if ( ab > t) {
-                jp = i
-                t = ab
-            }
+        if (pivoting) {
+          var t = abs(A(j)(j))
+          for (i <- (j+1) until M) {
+              val ab = abs(A(i)(j))
+              if ( ab > t) {
+                  jp = i
+                  t = ab
+              }
+          }
         }
-        
         pivot(j) = jp
 
         // jp now has the index of maximum element 
@@ -520,7 +519,7 @@ object AffineDenseLU extends PivotSetting {
             A(j) = A(jp)
             A(jp) = tA
         }
-      }   
+       
       if (j < M-1) {                // compute elements j+1:M of jth column
           // note A(j,j), was A(jp,p) previously which was
           // guarranteed not to be zero (Label #1)
@@ -614,7 +613,7 @@ object AffineDenseLU extends PivotSetting {
     //aprintVector(x)
     //println("average abs.error: " + SmartRandomUtils.computeAvrgAbsError(x))
     //println("average rel.error: " + SmartRandomUtils.computeAvrgError(x))
-    return (SmartRandomUtils.computeMaxAbsError(x), SmartRandomUtils.computeMaxError(x))
+    return (SmartRandomUtils.computeMaxError(x), SmartRandomUtils.computeMaxAbsError(x))
     //return normabs(b, matvec(A,x))/N
 
     //val EPS = 1.0e-12
@@ -672,9 +671,11 @@ object AffineDenseLU extends PivotSetting {
 
 
 
-object IntervalDenseLU extends PivotSetting {
+object IntervalDenseLU {
   import smartfloat.IntervalFloat
   import IntervalFloat._
+
+  import DenseLU.pivoting
 
   /**
     LU factorization (in place).
@@ -695,18 +696,19 @@ object IntervalDenseLU extends PivotSetting {
 
     for (j <- 0 until minMN) {
       // find pivot in column j and  test for singularity.
-      if (pivoting) {
+      
         var jp = j
         
-        var t = abs(A(j)(j))
-        for (i <- (j+1) until M) {
-            val ab = abs(A(i)(j))
-            if ( ab > t) {
-                jp = i
-                t = ab
-            }
+        if (pivoting) {
+          var t = abs(A(j)(j))
+          for (i <- (j+1) until M) {
+              val ab = abs(A(i)(j))
+              if ( ab > t) {
+                  jp = i
+                  t = ab
+              }
+          }
         }
-        
         pivot(j) = jp
 
         // jp now has the index of maximum element 
@@ -721,7 +723,7 @@ object IntervalDenseLU extends PivotSetting {
             A(j) = A(jp)
             A(jp) = tA
         }
-      }
+      
       if (j < M-1) {                // compute elements j+1:M of jth column
           // note A(j,j), was A(jp,p) previously which was
           // guarranteed not to be zero (Label #1)
@@ -815,7 +817,7 @@ object IntervalDenseLU extends PivotSetting {
     //aprintVector(x)
     //println("average abs.error: " + SmartRndomUtils.computeAvrgAbsError(x))
     //println("average rel.error: " + SmartRandomUtils.computeAvrgError(x))
-    return (SmartRandomUtils.computeMaxAbsError(x), SmartRandomUtils.computeMaxError(x))
+    return (SmartRandomUtils.computeMaxError(x), SmartRandomUtils.computeMaxAbsError(x))
     //return normabs(b, matvec(A,x))/N
 
     //val EPS = 1.0e-12

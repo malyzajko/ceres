@@ -197,11 +197,21 @@ object SmartRandomUtils {
     print("]\n")	
 	}
   
-  def computeMaxError(m: Array[Array[AffineFloat]]): Double = {
+  def computeMaxRelError(m: Array[Array[AffineFloat]]): Double = {
     var max = -1.0
     m.foreach{ row =>
       row.foreach {entry =>
        if(entry.relError > max) max = entry.relError
+      }    
+    }   
+    return max
+  }
+
+  def computeMaxAbsError(m: Array[Array[AffineFloat]]): Double = {
+    var max = -1.0
+    m.foreach{ row =>
+      row.foreach {entry =>
+       if(entry.absError > max) max = entry.absError
       }    
     }   
     return max
@@ -332,11 +342,21 @@ object SmartRandomUtils {
     print("]\n")	
 	}
   
-  def computeMaxError(m: Array[Array[IntervalFloat]]): Double = {
+  def computeMaxRelError(m: Array[Array[IntervalFloat]]): Double = {
     var max = -1.0
     m.foreach{ row =>
       row.foreach {entry =>
        if(entry.relError > max) max = entry.relError
+      }    
+    }   
+    return max
+  }
+
+  def computeMaxAbsError(m: Array[Array[IntervalFloat]]): Double = {
+    var max = -1.0
+    m.foreach{ row =>
+      row.foreach {entry =>
+       if(entry.absError > max) max = entry.absError
       }    
     }   
     return max
@@ -390,6 +410,7 @@ object SmartRandomUtils {
     }   
     return max
   }
+
 }
 
 

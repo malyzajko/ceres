@@ -130,7 +130,7 @@ class SmartFloat(val d: Double, val aa: AffineForm) extends ScalaNumber with Sca
 
   //following the interpretation of this being a range of floats
   override def toString: String = this.interval.toString +
-    "  (" + this.absError + ")(abs)"
+    "  (abs: " + this.absError + ")"
 
   //middle value +/- max deviation
   def toStringAsDeviation: String = d.toString + " +/- " + doubleFormat.format(aa.radius)
@@ -166,7 +166,7 @@ class SmartFloat(val d: Double, val aa: AffineForm) extends ScalaNumber with Sca
 
   //with relative errors
   def toStringWithErrors: String = {
-    toString + " (" + doubleFormat.format(relError) + ")"
+    toString + " (rel: " + doubleFormat.format(relError) + ")"
   }
 
   def toStringWithAbsErrors: String = {

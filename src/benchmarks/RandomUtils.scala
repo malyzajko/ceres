@@ -18,6 +18,26 @@ object RandomUtils {
 		return A
 	}
 
+  def randomVector(n: Int, max: Double, seed: Long): Array[Double] = {
+    val rand = new Random(seed)
+    val A = Array.fill(n){0.0}
+
+    for (i <- 0 until n)
+      A(i) = rand.nextDouble * max
+    return A
+  }
+
+  def randomSquareMatrix(n: Int, max: Double, seed: Long): Array[Array[Double]] = {
+    val rand = new Random(seed)
+
+    val A: Array[Array[Double]] = Array.fill(n, n){0.0}
+
+    for (i <- 0 until n)
+      for (j <- 0 until n)
+          A(i)(j) = rand.nextDouble * max
+    return A
+  }
+
   def randomMatrix(m: Int, n: Int): Array[Array[Double]] = {
    val A: Array[Array[Double]] = Array.fill(n, m){0.0}
 
