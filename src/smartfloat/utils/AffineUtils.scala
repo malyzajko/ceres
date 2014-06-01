@@ -44,20 +44,6 @@ object AffineUtils {
     s
   }
 
-  def formatQueue(q: AffineQueue): String = {
-    var s = ""
-    val iter = q.getIterator
-    while(iter.hasNext) {
-      val xi = iter.next
-      xi match {
-        case AffineNoise(i, v) => s += "{" + v.toString + "}p" + xi.index + "\n "
-        case _ => s += "XXXX"
-      }
-    }
-    s
-  }
-
-
 
   /* ####################################################################
     #####################    Queue summing     #########################
@@ -68,25 +54,6 @@ object AffineUtils {
     else {
       val iter = q.getIterator
       while(iter.hasNext) {   sum = addUp(sum, abs(iter.next.value))  }
-    }
-    sum
-  }
-
-  def sumQueue(q: AffineQueue): Array[Double] = {
-    //we're not just summing the radius', need to take into account the central
-    //values as well, since these are also roundoff errors
-    var sum = zero
-    if(q.size == 1) sum = Array(q.head.value.radius + math.abs(q.head.value.x0), 0.0)
-    else {
-      val iter = q.getIterator
-      while(iter.hasNext) {
-        iter.next.value match {
-          case a: AForm =>
-            sum = addUp(sum, a.radiusExt)
-            sum = addUp(sum, Array(math.abs(a.x0), 0.0))
-          case _=> assert(false, "wrong type of affine form")
-        }
-      }
     }
     sum
   }
@@ -380,45 +347,6 @@ object AffineUtils {
     return newDev
   }
 
-  def packNoiseSymbolsStdDev(queue: AffineQueue): AffineQueue = {
-    var sum = 0.0
-    var counter = 0
-    var iter = queue.getIterator
-    while(iter.hasNext) {
-      val ai = iter.next
-      val v = math.abs(ai.value.x0) + ai.value.radius
-      sum += v
-      counter += 1
-    }
-    val avrg = sum/counter
-
-    //compute st. deviation
-    var devSum = 0.0
-    iter = queue.getIterator
-    while(iter.hasNext) {
-      val ai = iter.next
-      val v = math.abs(ai.value.x0) + ai.value.radius
-      val diff = v - avrg
-      devSum += diff * diff
-    }
-    val stdDev = math.sqrt(devSum/counter)
-    val threshold = avrg + stdDev
-
-    //Now compute the new queue
-    var newNoise = Array(0.0, 0.0)
-    var newDev = new AffineQueue
-
-    val iter2 = queue.getIterator
-    while(iter2.hasNext) {
-      val ai = iter2.next
-      val v =  addUp(Array(math.abs(ai.value.x0), 0.0), ai.value.radiusExt)
-      if(v(0) < threshold) newNoise = addUp(newNoise, v)     //this way we keep the
-      else newDev :+ ai
-    }
-    newDev :+ new AffineNoise(newIndex, newNoise)
-    return newDev
-  }
-
   def packNoiseSymbolsBruteForce(queue: Queue): Queue = {
     var newNoise = Array(0.0, 0.0)
     var newDev = new Queue
@@ -442,20 +370,6 @@ object AffineUtils {
       }
     }
     newDev :+ new Noise(newIndex, newNoise)
-    return newDev
-  }
-
-  def packNoiseSymbolsBruteForce(queue: AffineQueue): AffineQueue = {
-    var newNoise = Array(0.0, 0.0)
-    var newDev = new AffineQueue
-
-    val iter2 = queue.getIterator
-    while(iter2.hasNext) {
-      val ai = iter2.next
-      newNoise = addUp(newNoise, addUp(Array(math.abs(ai.value.x0), 0.0), ai.value.radiusExt))
-
-    }
-    newDev :+ new AffineNoise(newIndex, newNoise)
     return newDev
   }
 
@@ -559,50 +473,6 @@ object AffineUtils {
     return (deviation, delta)
   }
 
-  def addAffineQueues(xn: AffineQueue, yn: AffineQueue): AffineQueue = {
-    var deviation = new AffineQueue
-    val iterX = xn.getIterator
-    val iterY = yn.getIterator
-
-    var xi: AffineNoise = if(iterX.hasNext) iterX.next
-      else new AffineNoise(Int.MaxValue, 0.0)
-    var yi: AffineNoise = if(iterY.hasNext) iterY.next
-      else new AffineNoise(Int.MaxValue, 0.0)
-
-    while (iterX.hasNext || iterY.hasNext) {
-      if(xi.index == yi.index) {
-        val zi: AffineForm =  xi.value + yi.value
-        if(zi.isNonZero) deviation :+ new AffineNoise(xi.index, zi)
-        if(iterX.hasNext) xi = iterX.next else xi = new AffineNoise(Int.MaxValue, 0.0)
-        if(iterY.hasNext) yi = iterY.next else yi = new AffineNoise(Int.MaxValue, 0.0)
-      }
-      else if(xi.index < yi.index) {
-        deviation :+ xi
-        if(iterX.hasNext) xi = iterX.next else xi = new AffineNoise(Int.MaxValue, 0.0)
-      }
-      else {
-        deviation :+ yi
-        if(iterY.hasNext) yi = iterY.next else yi = new AffineNoise(Int.MaxValue, 0.0)
-      }
-    }//both
-    if(xi.index == yi.index && xi.index != Int.MaxValue) {
-      val zi =  xi.value + yi.value
-      if(zi.isNonZero) deviation :+ new AffineNoise(xi.index, zi)
-    }
-    else {
-      if(xi.index < yi.index){
-        if(xi.index != Int.MaxValue) deviation :+ xi
-        if(yi.index != Int.MaxValue) deviation :+ yi
-      }
-      else {
-        if(yi.index != Int.MaxValue) deviation :+ yi
-        if(xi.index != Int.MaxValue) deviation :+ xi
-      }
-    }
-
-    return deviation
-  }
-
   // returns the added Queue + the error committed in the computation
   def subtractQueues(xn: Queue, yn: Queue): (Queue, Array[Double]) = {
     var delta = Array(0.0, 0.0)
@@ -647,55 +517,6 @@ object AffineUtils {
     DoubleQueueIterator.iterate[Array[Double], Deviation](iterX, iterY, new Noise(Int.MaxValue, 0.0), fx, fy, fCouple)
     return (deviation, delta)
   }
-
-
-
-
-  // returns the added Queue + the error committed in the computation
-  def subtractAffineQueues(xn: AffineQueue, yn: AffineQueue): AffineQueue = {
-    var deviation = new AffineQueue
-    val iterX = xn.getIterator
-    val iterY = yn.getIterator
-
-    var xi: AffineNoise = if(iterX.hasNext) iterX.next
-      else new AffineNoise(Int.MaxValue, 0.0)
-    var yi: AffineNoise = if(iterY.hasNext) iterY.next
-      else new AffineNoise(Int.MaxValue, 0.0)
-
-    while (iterX.hasNext || iterY.hasNext) {
-      if(xi.index == yi.index) {
-        val zi =  xi.value - yi.value
-        if(zi.isNonZero) deviation :+ new AffineNoise(xi.index, zi)
-        if(iterX.hasNext) xi = iterX.next else xi = new AffineNoise(Int.MaxValue, 0.0)
-        if(iterY.hasNext) yi = iterY.next else yi = new AffineNoise(Int.MaxValue, 0.0)
-      }
-      else if(xi.index < yi.index) {
-        deviation :+ xi
-        if(iterX.hasNext) xi = iterX.next else xi = new AffineNoise(Int.MaxValue, 0.0)
-      }
-      else {
-        deviation :+ -yi
-        if(iterY.hasNext) yi = iterY.next else yi = new AffineNoise(Int.MaxValue, 0.0)
-      }
-    }//both
-    if(xi.index == yi.index && xi.index != Int.MaxValue) {
-      val zi =  xi.value - yi.value
-      if(zi.isNonZero) deviation :+ new AffineNoise(xi.index, zi)
-    }
-    else {
-      if(xi.index < yi.index){
-        if(xi.index != Int.MaxValue) deviation :+ xi
-        if(yi.index != Int.MaxValue) deviation :+ -yi
-      }
-      else {
-        if(yi.index != Int.MaxValue) deviation :+ -yi
-        if(xi.index != Int.MaxValue) deviation :+ xi
-      }
-    }
-
-    return deviation
-  }
-
 
   def multiplyQueues(a: Double, xqueue: Queue, b: Double, yqueue: Queue): (Queue, Array[Double]) = {
     var delta = Array(0.0, 0.0)
@@ -759,65 +580,6 @@ object AffineUtils {
     }
     DoubleQueueIterator.iterate[Array[Double], Deviation](iterX, iterY, new Noise(Int.MaxValue, 0.0), fx, fy, fCouple)
     return(deviation, delta)
-  }
-
-  def multiplyAffineQueues(a: AffineForm, xqueue: AffineQueue,
-    b: AffineForm, yqueue: AffineQueue): AffineQueue = {
-    //println("Multiply queues: a:"+a + ", xqueue:"+xqueue+", b:"+b+", yqueue:"+yqueue)
-    var deviation = new AffineQueue
-    val iterX = xqueue.getIterator
-    val iterY = yqueue.getIterator
-
-    var xi: AffineNoise = if(iterX.hasNext) iterX.next
-      else new AffineNoise(Int.MaxValue, 0.0)
-    var yi: AffineNoise = if(iterY.hasNext) iterY.next
-      else new AffineNoise(Int.MaxValue, 0.0)
-
-    while (iterX.hasNext || iterY.hasNext) {
-      if(xi.index == yi.index) {
-        val zi =  b * xi.value + a * yi.value
-        if(zi.isNonZero) deviation :+ new AffineNoise(xi.index, zi)
-        if(iterX.hasNext) xi = iterX.next else xi = new AffineNoise(Int.MaxValue, 0.0)
-        if(iterY.hasNext) yi = iterY.next else yi = new AffineNoise(Int.MaxValue, 0.0)
-      }
-      else if(xi.index < yi.index) {
-        val zi =  b * xi.value
-        if(zi.isNonZero) deviation :+ new AffineNoise(xi.index, zi)
-        if(iterX.hasNext) xi = iterX.next else xi = new AffineNoise(Int.MaxValue, 0.0)
-      }
-      else {
-        val zi =  a * yi.value
-        if(zi.isNonZero) deviation :+ new AffineNoise(yi.index, zi)
-        if(iterY.hasNext) yi = iterY.next else yi = new AffineNoise(Int.MaxValue, 0.0)
-      }
-    }//both
-    if(xi.index == yi.index && xi.index != Int.MaxValue) {
-      val zi =  b * xi.value + a * yi.value
-      if(zi.isNonZero) deviation :+ new AffineNoise(xi.index, zi)
-    }
-    else {
-      if(xi.index < yi.index){
-        if(xi.index != Int.MaxValue) {
-          val zi =   b * xi.value
-          if(zi.isNonZero) deviation :+ new AffineNoise(xi.index, zi)
-        }
-        if(yi.index != Int.MaxValue) {
-          val zi =  a * yi.value
-          if(zi.isNonZero) deviation :+ new AffineNoise(yi.index, zi)
-        }
-      }
-      else {
-        if(yi.index != Int.MaxValue) {
-          val zi =  a * yi.value
-          if(zi.isNonZero) deviation :+ new AffineNoise(yi.index, zi)
-        }
-        if(xi.index != Int.MaxValue) {
-          val zi =   b * xi.value
-          if(zi.isNonZero) deviation :+ new AffineNoise(xi.index, zi)
-        }
-      }
-    }
-    return deviation
   }
 
 }
