@@ -39,7 +39,13 @@ object FFT {
     val x = irandomVector(2*N)
     IntervalFFT.transform(x) // forward transform
     IntervalFFT.inverse(x)
-  }  
+  } 
+
+  def doubleFFTFresh(N: Int = 512) = {
+    val x = randomVector(2*N)
+    FFTDouble.transform(x) // forward transform
+    FFTDouble.inverse(x)
+  } 
 }
 
 

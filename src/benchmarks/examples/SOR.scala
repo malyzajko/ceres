@@ -19,7 +19,7 @@ The data size for the LARGE version of the benchmark uses a 1,000x1,000 grid.
 object SOR {
 	// so they are equal for comparison of errors, this also means that the
 	// starting point is always the same
-	var doubleMatrix100 = randomMatrix(100, 100)
+	var doubleMatrix100 = randomSquareMatrix(100, 10.0, 4357)
   var affineMatrix100 = aconvertMatrix(doubleMatrix100)
   var smartMatrix100 = sconvertMatrix(doubleMatrix100)
   var intervalMatrix100 = iconvertMatrix(doubleMatrix100)
@@ -37,22 +37,21 @@ object SOR {
 
 
 	def affineSOR(numIter: Int) = {
-    val sm1 = affineMatrix100
-    val res = executeAffine(1.25, sm1, numIter)
-    res
+    executeAffine(1.25, affineMatrix100, numIter)
   }
   
   def intervalSOR(numIter: Int) = {
-    val sm1 = intervalMatrix100
-    val res = executeInterval(1.25, sm1, numIter)
-    res
+    executeInterval(1.25, intervalMatrix100, numIter)
   }
 
-  def smartSOR(numIter: Int) = {
-    val sm1 = smartMatrix100
-    val res = executeSmart(1.25, sm1, numIter)
-    res
+  def doubleSOR(numIter: Int) = {
+    execute(1.25, doubleMatrix100, numIter)
   }
+
+  /*def smartSOR(numIter: Int) = {
+    val sm1 = smartMatrix100
+    executeSmart(1.25, sm1, numIter)
+  }*/
 
 	def execute(omega: Double, G: Array[Array[Double]], num_iterations: Int) = {
 		val M = G.length

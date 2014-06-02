@@ -12,18 +12,18 @@ The data size for the LARGE version of the benchmark uses a 1,000 x 1,000 matrix
 
 object DenseLU {
 
-  val pivoting: Boolean = false
+  val pivoting: Boolean = true
 
-  def doubleLU(dim: Int): Double = {
+  def doubleLU(dim: Int) = {
     val A = randomMatrix(dim, dim)
     val lu = copyMatrix(A)
     val x = randomVector(dim)
     val pivot: Array[Int] = Array.fill(dim){0}
     
     DoubleDenseLU.factor(lu, pivot)
-    println("pivot: " + pivot.toList)
+    //println("pivot: " + pivot.toList)
     //DoubleDenseLU.solve(lu, pivot, x) 
-    DoubleDenseLU.verify(A, lu, pivot)
+    DoubleDenseLU.solve(lu, pivot, x)
   }
   
   def smartLU(dim: Int) = {

@@ -14,10 +14,24 @@ object AffineFloatBenchmarks extends App {
     case "sor" => runSOR
     case "lu" => runDenseLU
     case "fft" => runFFT
+    case "packing" => runPacking
+  }
+
+  def runPacking = {
+    println("NBody: " + printCompleteAffineFloat( NBody.affineSimulate(1000, 0.01) ))
+
+    println("Spectral: " + printCompleteAffineFloat( SpectralNorm.approximateAffine(20) ))
+
+    println("SOR: " + SOR.compareAffineInterval(20, 4357)._2)
+
+    println("LU: " + DenseLU.compareLUAffineInterval(15, 4357)._2)
+
+    println("FFT: " + FFT.compareFFTAffineInterval(512, 4357)._2)
   }
 
   def runNBody = {
     import NBody._
+
     println("Running Nbody simulation, measuring energy\n")
     println("AffineFloat, 1s")
     println("dt=0.01     " + printCompleteAffineFloat( affineSimulate(100, 0.01) ))
@@ -34,7 +48,7 @@ object AffineFloatBenchmarks extends App {
     println("IntervalFloat, 5s")
     println("dt=0.01     " + printCompleteIntervalFloat( intervalSimulate(500, 0.01) ))
     println("dt=0.015625 " + printCompleteIntervalFloat( intervalSimulate(320, 0.015625) ))
-
+    
   }
 
   def runSpectralNorm = {

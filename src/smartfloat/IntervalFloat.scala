@@ -123,7 +123,7 @@ class IntervalFloat(val d: Double, val aa: Interval) extends ScalaNumber with Sc
   override def hashCode(): Int = d.hashCode + interval.xlo.hashCode + interval.xhi.hashCode
 
   //following the interpretation of this being a range of floats
-  override def toString: String = interval + " (" + relError + ")"
+  override def toString: String = d.toString + "(abs: " + absError+ ") (rel: " + relError + ")"
 
   //middle value +/- max deviation
   def toStringAsDeviation: String = d.toString + " +/- " + doubleFormat.format(aa.radius)

@@ -19,7 +19,7 @@ scalaSource in Compile <<= baseDirectory(_ / "src")
 resolvers += "Sonatype OSS Snapshots" at
   "https://oss.sonatype.org/content/repositories/snapshots"
 
-libraryDependencies += "com.github.axel22" %% "scalameter" % "0.4"
+libraryDependencies += "com.github.axel22" %% "scalameter" % "0.5-M2"
 
 testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
