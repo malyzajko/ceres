@@ -38,35 +38,3 @@ case class Uncertainty(val i: Int, val v: Array[Double]) extends Deviation(i, v)
   def this(i: Int, d: Double) = this(i, Array(d, 0.0))
   def unary_-(): Uncertainty = new Uncertainty(index, Array(-value(0), -value(1)))
 }
-
-//@invariant v instanceof StandardAffineForm
-case class AffineNoise(val index: Int, var value: AffineForm) {
-  def this(i: Int, d: Double) = this(i, new AForm(d)) //d is gonna be the x0
-  def this(i: Int, ad: Array[Double]) = this(i, new AForm(ad))
-
-  def unary_-(): AffineNoise = new AffineNoise(index, -value)
-
-  def cleanUp = value match {
-    case aa: AForm =>
-      var x0new = aa.x0
-      var newNoise = Array(0.0, 0.0)
-      var deviation = Queue.empty
-      val iter = aa.xnoise.getIterator
-
-      while(iter.hasNext) {
-        val xi = iter.next
-        xi match {
-          case n:Noise => newNoise = ceres.common.DDouble.addUp(newNoise, n.v)
-          case u:Uncertainty =>
-            deviation :+ xi
-          case _=> assert(false, "error in cleanup, wrong type of Affine form")
-        }
-      }
-      deviation :+ new Noise(AffineForm.newIndex, newNoise)
-      value = AForm(x0new, deviation)
-
-    case EmptyForm => ;
-    case FullForm => ;
-    case _ => assert(false, "error in cleanup, the affine form is not an AForm")
-  }
-}
