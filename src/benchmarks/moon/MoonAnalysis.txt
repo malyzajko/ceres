@@ -1,0 +1,78 @@
+package test.astro
+
+
+import org.scalatest.FunSuite
+import smartfloat.datatypes.{AffineFloat, SmartFloat}
+
+class MoonAnalysis extends FunSuite {
+
+  test("delta computation - affine") {
+    import AffineFloat._
+    val delta1 = -2.607438794791856
+    val delta2 = -2.6074387947918729
+
+    var delta = delta1
+    var ddelta = (delta).toInt
+		var mndelta = math.abs(((delta-ddelta)*60.0).toInt)
+    var aadelta = new AffineFloat(delta)
+		var sdelta = abs(((aadelta-ddelta)*60.0 - ((aadelta-ddelta)*60.).toInt)*60.0)
+    println("\ndelta 1")
+    println(sdelta)
+    println(sdelta.toStringWithIntervals)
+
+    delta = delta2
+    ddelta = (delta).toInt
+		mndelta = math.abs(((delta-ddelta)*60.0).toInt)
+    aadelta = new AffineFloat(delta)
+		sdelta = abs(((aadelta-ddelta)*60.0 - ((aadelta-ddelta)*60.).toInt)*60.0)
+    println("\ndelta 2")
+    println(sdelta)
+    println(sdelta.toStringWithIntervals)
+  }
+
+  test("\ndelta computation - smartfloat") {
+    import SmartFloat._
+    var delta = new SmartFloat(-2.607438794791864, 2.0e-14)
+    var ddelta = (delta).toInt
+		var mndelta = math.abs(((delta-ddelta)*60.0).toInt)
+    var sdelta = abs(((delta-ddelta)*60.0 - ((delta-ddelta)*60.).toInt)*60.0)
+    println("delta smartfloat: ")
+    println(sdelta)
+  }
+
+  /*test("alpha computation - affine") {
+    import AffineFloat._
+    val delta1 = 173.69903942141244
+    val delta2 = 
+
+    var delta = delta1
+    var ddelta = (delta).toInt
+		var mndelta = math.abs(((delta-ddelta)*60.0).toInt)
+    var aadelta = new AffineFloat(delta)
+		var sdelta = abs(((aadelta-ddelta)*60.0 - ((aadelta-ddelta)*60.).toInt)*60.0)
+    println("\ndelta 1")
+    println(sdelta)
+    println(sdelta.toStringWithIntervals)
+
+    delta = delta2
+    ddelta = (delta).toInt
+		mndelta = math.abs(((delta-ddelta)*60.0).toInt)
+    aadelta = new AffineFloat(delta)
+		sdelta = abs(((aadelta-ddelta)*60.0 - ((aadelta-ddelta)*60.).toInt)*60.0)
+    println("\ndelta 2")
+    println(sdelta)
+    println(sdelta.toStringWithIntervals)
+  }*/
+
+  test("\nalpha computation - smartfloat") {
+    import SmartFloat._
+    var alpha = new SmartFloat(173.69903942141244, 2.0e-14)
+    val halpha = (alpha/15.0).toInt;
+    val mnalpha = ((alpha/15.0-halpha)*60.0).toInt;
+		val salpha = ((alpha/15.0-halpha)*60.0-mnalpha)*60.0;
+    println("alpha smartfloat: ")
+    println(salpha)
+  }
+
+
+}

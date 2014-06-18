@@ -5,34 +5,23 @@ package benchmarks
 import smartfloat._
 import scala.collection.mutable.LinkedList
 
+import SmartFloat._
+
 /**
  * These are examples from the Technical Report.
  */
-object PaperExamples extends App {
+object SmartFloatExamples extends App {
 
-  quadraticEquation
+  triangleExampleSection
+  //quadraticEquation
 
-  quadraticEquationSmart
+  //quadraticEquationSmart
 
-  //triangleExampleSection
+  
 
   //cubeRoot
   
-  /**
-   * Computes the cube root of 10 by Halley's method.
-   */
-  def cubeRoot = {
-    import AffineFloat._
-    println("~~~ Cube root ~~~")
-    val a: AffineFloat = 10
-    var xn = AffineFloat(1.6)
-
-    for(i <- 1 until 3) {
-        xn = xn * ((xn*xn*xn + 2.0*a)/(2.0*xn*xn*xn + a))
-    }
-    println("final:" + xn.toStringWithAbsErrors)
-    println("intervals: " + xn.interval)
-  }
+  
   
   
   /**
@@ -134,30 +123,24 @@ object PaperExamples extends App {
       
     sqrt((a+(b+c)) * (c-(a-b)) * (c+(a-b)) * (a+(b-c))) / 4.0
   }
-  
+
   def triangleExampleSection = {
     println("SmartFloat: textbook")
-    println(triangleTextbook(9.0, SmartFloat(4.8, 0.09), SmartFloat(4.8, 0.09)))
-    println(triangleTextbook(9.0, SmartFloat(4.7, 0.09), SmartFloat(4.7, 0.09)))
-    
-    println("\nIntervalFloat: textbook")
-    println(triangleTextbook(9.0, IntervalFloat(4.8, 0.09), IntervalFloat(4.8, 0.09)))
-    println(triangleTextbook(9.0, IntervalFloat(4.7, 0.09), IntervalFloat(4.7, 0.09)))
+    println(triangleTextbook(9.0, 4.8 +/- 0.09, 4.8 +/- 0.09))
+    println(triangleTextbook(9.0, 4.7 +/- 0.09, 4.7 +/- 0.09))
+    println(triangleTextbook(9.0, 4.541 +/- 0.04, 4.541 +/- 0.04))
     
     println("\nSmartFloat: Kahan")
-    println(triangleKahan(9.0, SmartFloat(4.8, 0.09), SmartFloat(4.8, 0.09)))
-    println(triangleKahan(9.0, SmartFloat(4.7, 0.09), SmartFloat(4.7, 0.09)))
-    
-    
-    println("IntervalFloat: Kahan")
-    println(triangleKahan(9.0, IntervalFloat(4.8, 0.09), IntervalFloat(4.8, 0.09)))
-    println(triangleKahan(9.0, IntervalFloat(4.7, 0.09), IntervalFloat(4.7, 0.09)))
-    
-    
-    println("\nAffineFloat for these values: a = 9.0, b = 4.53, c=4.53")
-    println("according to Mathematica  A=2.34216246234115877566387422739")
-    println(triangleKahan(AffineFloat(9.0), AffineFloat(4.61), AffineFloat(4.61)))
+    println(triangleKahan(9.0, 4.8 +/- 0.09, 4.8 +/- 0.09))
+    println(triangleKahan(9.0, 4.7 +/- 0.09, 4.7 +/- 0.09))
+    println(triangleKahan(9.0, 4.541 +/- 0.04, 4.541 +/- 0.04))
+
+    //println("\nAffineFloat for these values: a = 9.0, b = 4.53, c=4.53")
+    //println("according to Mathematica  A=2.34216246234115877566387422739")
+    //println(triangleKahan(AffineFloat(9.0), AffineFloat(4.61), AffineFloat(4.61)))
   }
+  
+  
       
   def triangleTextbook(a: IntervalFloat, b: IntervalFloat, c: IntervalFloat) = {
     import IntervalFloat._
@@ -308,6 +291,30 @@ object PaperExamples extends App {
   
   }
   
+
+  /*def triangleExampleSection = {
+    println("SmartFloat: textbook")
+    println(triangleTextbook(9.0, SmartFloat(4.8, 0.09), SmartFloat(4.8, 0.09)))
+    println(triangleTextbook(9.0, SmartFloat(4.7, 0.09), SmartFloat(4.7, 0.09)))
+    
+    println("\nIntervalFloat: textbook")
+    println(triangleTextbook(9.0, IntervalFloat(4.8, 0.09), IntervalFloat(4.8, 0.09)))
+    println(triangleTextbook(9.0, IntervalFloat(4.7, 0.09), IntervalFloat(4.7, 0.09)))
+    
+    println("\nSmartFloat: Kahan")
+    println(triangleKahan(9.0, SmartFloat(4.8, 0.09), SmartFloat(4.8, 0.09)))
+    println(triangleKahan(9.0, SmartFloat(4.7, 0.09), SmartFloat(4.7, 0.09)))
+    
+    
+    println("IntervalFloat: Kahan")
+    println(triangleKahan(9.0, IntervalFloat(4.8, 0.09), IntervalFloat(4.8, 0.09)))
+    println(triangleKahan(9.0, IntervalFloat(4.7, 0.09), IntervalFloat(4.7, 0.09)))
+    
+    
+    println("\nAffineFloat for these values: a = 9.0, b = 4.53, c=4.53")
+    println("according to Mathematica  A=2.34216246234115877566387422739")
+    println(triangleKahan(AffineFloat(9.0), AffineFloat(4.61), AffineFloat(4.61)))
+  }*/
    
 }
 

@@ -154,8 +154,22 @@ object AffineFloatBenchmarks extends App {
   //} 
  
   
-  /* ###################################
-  #####################################*/
+  /**
+   * Computes the cube root of 10 by Halley's method.
+   */
+  def cubeRoot = {
+    import AffineFloat._
+    println("~~~ Cube root ~~~")
+    val a: AffineFloat = 10
+    var xn = AffineFloat(1.6)
+
+    for(i <- 1 until 3) {
+        xn = xn * ((xn*xn*xn + 2.0*a)/(2.0*xn*xn*xn + a))
+    }
+    println("final:" + xn.toStringWithAbsErrors)
+    println("intervals: " + xn.interval)
+  }
+
   
   def affineSpring(h:AffineFloat, tmax: Double): AffineFloat = {
     val k: AffineFloat = 1.0

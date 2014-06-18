@@ -48,10 +48,9 @@ object SOR {
     execute(1.25, doubleMatrix100, numIter)
   }
 
-  /*def smartSOR(numIter: Int) = {
-    val sm1 = smartMatrix100
-    executeSmart(1.25, sm1, numIter)
-  }*/
+  def smartSOR(numIter: Int) = {
+    executeSmart(1.25, smartMatrix100, numIter)
+  }
 
 	def execute(omega: Double, G: Array[Array[Double]], num_iterations: Int) = {
 		val M = G.length

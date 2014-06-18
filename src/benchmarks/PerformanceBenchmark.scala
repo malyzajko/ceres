@@ -26,7 +26,7 @@ object PerformanceBenchmark extends PerformanceTest {
   /* tests */
 
   //val integrationSteps = Gen.range("size")(100, 1000, 100)
-  /*val integrationSteps = Gen.range("size")(100, 1000, 100)
+  val integrationSteps = Gen.range("size")(100, 300, 100)
 
   performance of "NBody" config(
       exec.jvmflags -> "-Xmx2048m -Xms2048m -XX:CompileThreshold=100 -Djava.library.path=lib/"
@@ -45,7 +45,7 @@ object PerformanceBenchmark extends PerformanceTest {
       }
     }
 
-    measure method "interval" config(
+    /*measure method "interval" config(
       exec.minWarmupRuns -> 10,
       exec.maxWarmupRuns -> 30,
       exec.independentSamples -> 2
@@ -65,6 +65,18 @@ object PerformanceBenchmark extends PerformanceTest {
       using(integrationSteps) in {
         steps => {
           NBody.affineSimulate(steps, 0.01)
+        }
+      }
+    }*/
+
+     measure method "smart" config(
+      exec.minWarmupRuns -> 10,
+      exec.maxWarmupRuns -> 30,
+      exec.independentSamples -> 2
+    ) in {
+      using(integrationSteps) in {
+        steps => {
+          NBody.smartSimulate(steps, 0.01)
         }
       }
     }
@@ -88,7 +100,7 @@ object PerformanceBenchmark extends PerformanceTest {
       }
     }
 
-    measure method "interval" config(
+    /*measure method "interval" config(
       exec.minWarmupRuns -> 10,
       exec.maxWarmupRuns -> 30,
       exec.independentSamples -> 2
@@ -110,8 +122,19 @@ object PerformanceBenchmark extends PerformanceTest {
           SpectralNorm.approximateAffine(iter)
         }
       }
-    }
+    }*/
     
+    measure method "smart" config(
+      exec.minWarmupRuns -> 10,
+      exec.maxWarmupRuns -> 30,
+      exec.independentSamples -> 2
+    ) in {
+      using(iterationSpectral) in {
+        iter => {
+          SpectralNorm.approximateSmart(iter)
+        }
+      }
+    }
   }
 
 
@@ -134,7 +157,7 @@ object PerformanceBenchmark extends PerformanceTest {
       }
     }   
 
-    measure method "interval" config(
+    /*measure method "interval" config(
       exec.minWarmupRuns -> 10,
       exec.maxWarmupRuns -> 30,
       exec.independentSamples -> 2
@@ -156,7 +179,19 @@ object PerformanceBenchmark extends PerformanceTest {
           SOR.affineSOR(iter)
         }
       }
-    } 
+    }*/
+ 
+    measure method "smart" config(
+      exec.minWarmupRuns -> 5,
+      exec.maxWarmupRuns -> 20,
+      exec.independentSamples -> 2
+    ) in {
+      using(iterationsSOR) in {
+        iter => {
+          SOR.smartSOR(iter)
+        }
+      }
+    }
   }
 
   val dimLU = Gen.range("size")(5, 15, 5)
@@ -177,7 +212,7 @@ object PerformanceBenchmark extends PerformanceTest {
       }
     }    
 
-    measure method "interval" config(
+    /*measure method "interval" config(
       exec.minWarmupRuns -> 30,
       exec.maxWarmupRuns -> 50,
       exec.independentSamples -> 2
@@ -199,9 +234,22 @@ object PerformanceBenchmark extends PerformanceTest {
           DenseLU.affineLU(dim)
         }
       }
+    }*/
+
+    measure method "smart" config(
+      exec.minWarmupRuns -> 30,
+      exec.maxWarmupRuns -> 50,
+      exec.independentSamples -> 2
+    ) in {
+      using(dimLU) in {
+        dim => {
+          DenseLU.smartLU(dim)
+        }
+      }
     }
+
   }
-  */
+  
 
   // probably needs to be some power of 2 or some such
   val dimFFT = Gen.range("size")(256, 512, 256)
@@ -222,7 +270,7 @@ object PerformanceBenchmark extends PerformanceTest {
       }
     }
 
-    measure method "interval" config(
+   /* measure method "interval" config(
       exec.minWarmupRuns -> 10,
       exec.maxWarmupRuns -> 30,
       exec.independentSamples -> 2
@@ -242,6 +290,18 @@ object PerformanceBenchmark extends PerformanceTest {
       using(dimFFT) in {
         dim => {
           FFT.affineFFTFresh(dim)
+        }
+      }
+    }*/
+  
+    measure method "smart" config(
+      exec.minWarmupRuns -> 10,
+      exec.maxWarmupRuns -> 30,
+      exec.independentSamples -> 2
+    ) in {
+      using(dimFFT) in {
+        dim => {
+          FFT.smartFFTFresh(dim)
         }
       }
     }

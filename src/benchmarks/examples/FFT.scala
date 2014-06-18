@@ -35,6 +35,12 @@ object FFT {
     AffineFFT.inverse(x)
   }
 
+  def smartFFTFresh(N: Int = 512) = {
+    val x = srandomVector(2*N)
+    SmartFFT.transform(x) // forward transform
+    SmartFFT.inverse(x)
+  }
+
   def intervalFFTFresh(N: Int = 512) = {
     val x = irandomVector(2*N)
     IntervalFFT.transform(x) // forward transform
