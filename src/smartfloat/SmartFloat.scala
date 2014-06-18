@@ -10,11 +10,18 @@ import scala.math.{ScalaNumericConversions, ScalaNumber}
 object SmartFloat {
   case class SmartFloatComparisonUndetermined(s: String) extends Exception
 
+  class SmartDouble(d: Double) {
+    def +/-(un: Double): SmartFloat = new SmartFloat(d, new GeneralForm(d, un))
+  }
+
+  implicit def double2SmartDouble(d: Double): SmartDouble = new SmartDouble(d)
+
   implicit def double2SmartFloat(d : Double): SmartFloat = new SmartFloat(d)
 
   //variables
   def apply(d: Double): SmartFloat = new SmartFloat(d)
   def apply(d: Double, u: Double): SmartFloat = new SmartFloat(d, u)
+
 
   /*
     Exception handler for comparisons.
@@ -97,6 +104,7 @@ class SmartFloat(val d: Double, val aa: AffineForm) extends ScalaNumber with Sca
 
   def this(ff: Double) = this(ff, new GeneralForm(ff))
   def this(ff: Double, un: Double) = this(ff, new GeneralForm(ff, un))
+
 
   def +(y: SmartFloat): SmartFloat = new SmartFloat(this.d + y.d, this.aa + y.aa)
   def -(y: SmartFloat): SmartFloat = new SmartFloat(this.d - y.d, this.aa - y.aa)
