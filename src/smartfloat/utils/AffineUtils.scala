@@ -91,7 +91,6 @@ object AffineUtils {
     delta
   }
 
-
      /* ####################################################################
     #####################    Roundoff computation over ranges     #########################
      ####################################################################*/
@@ -103,8 +102,9 @@ object AffineUtils {
     val zlo = abs(subDown(xn, 0.0, sum(0), sum(1)))
     val zhi = abs(addUp(xn, 0.0, sum(0), sum(1)))
     val m = max(zlo, zhi)
-    return multUp(m, Array(ulp, 0.0))
     
+    divUp(math.ulp(addU(m(0), m(1))), 0.0, 2.0, 0.0)
+    //return multUp(m, Array(ulp, 0.0))
   }
 
   def getRoundoff1(xn: Double, xqueue:Queue): Array[Double] = {
@@ -114,8 +114,9 @@ object AffineUtils {
     val zhi = abs(addUp(xn, 0.0, sum(0), sum(1)))
 
     val m = max(zlo, zhi)
-    return multUp(m, Array(2*ulp, 0.0))
-    
+
+    Array(java.lang.Math.nextUp(math.ulp(addU(m(0), m(1)))), 0.0)
+    //return multUp(m, Array(2*ulp, 0.0))
   }
 
 

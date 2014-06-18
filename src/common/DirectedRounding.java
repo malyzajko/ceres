@@ -34,7 +34,8 @@ public class DirectedRounding {
   }
   
   public static double roundOff(double x) {
-    return Math.nextUp(u*Math.abs(x));
+    return divUp(Math.ulp(Math.abs(x)), 2.0);
+    //return Math.nextUp(u*Math.abs(x));
   }
   
   public static double up1(double x) {
@@ -52,8 +53,10 @@ public class DirectedRounding {
       return nextDown(x - Math.ulp(x));
   }
 
+
   public static double roundOff1(double x) {
-    return Math.nextUp(2*(u*Math.abs(x)));
+    return Math.nextUp(Math.ulp(Math.abs(x)));
+    //return Math.nextUp(2*(u*Math.abs(x)));
   }
   
   public static boolean isExact(double d) {
