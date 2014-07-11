@@ -165,7 +165,7 @@ case class CenterForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
     var (x0_new, delta) = computeRangeReducedX0(x0, xlo)
     var (zeta: DD, rdoff: DD) = computeCentralZeta(math.cos(x0), alpha, x0_new(0) + x0_new(1))
-    delta = addUp(computeDelta(zeta, dmin, dmax), rdoff)
+    delta = addUp(delta, addUp(computeDelta(zeta, dmin, dmax), rdoff))
     return symmetricUnary(math.cos(x0), xnoise, alpha, zeta, delta)
   }
 
@@ -185,7 +185,7 @@ case class CenterForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
     var (x0_new, delta) = computeRangeReducedX0(x0, xlo)
     var (zeta: DD, rdoff: DD) = computeCentralZeta(math.sin(x0), alpha, x0_new(0) + x0_new(1))
-    delta = addUp(computeDelta(zeta, dmin, dmax), rdoff)
+    delta = addUp(delta, addUp(computeDelta(zeta, dmin, dmax), rdoff))
     return symmetricUnary(math.sin(x0), xnoise, alpha, zeta, delta)
   }
 
@@ -205,7 +205,7 @@ case class CenterForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
     var (x0_new, delta) = computeRangeReducedX0Tan(k, x0)
     var (zeta: DD, rdoff: DD) = computeCentralZeta(math.tan(x0), alpha, x0_new(0) + x0_new(1))
-    delta = addUp(computeDelta(zeta, dmin, dmax), rdoff)
+    delta = addUp(delta, addUp(computeDelta(zeta, dmin, dmax), rdoff))
     return symmetricUnary(math.tan(x0), xnoise, alpha, zeta, delta)
   }
 
