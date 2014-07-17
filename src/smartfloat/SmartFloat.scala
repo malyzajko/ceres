@@ -47,6 +47,9 @@ object SmartFloat {
   def exp(x: SmartFloat): SmartFloat = new SmartFloat(math.exp(x.d), x.aa.exponential)
   def pow(x: SmartFloat, y: SmartFloat): SmartFloat =
     new SmartFloat(math.pow(x.d, y.d), (y.aa * x.aa.ln).exponential)
+  def pow2(x: SmartFloat): SmartFloat = x * x
+  def pow3(x: SmartFloat): SmartFloat = x * x * x
+  def pow4(x: SmartFloat): SmartFloat = x * x * x * x
   def cos(x: SmartFloat): SmartFloat = new SmartFloat(math.cos(x.d), x.aa.cosine)
   def sin(x: SmartFloat): SmartFloat = new SmartFloat(math.sin(x.d), x.aa.sine)
   def tan(x: SmartFloat): SmartFloat = new SmartFloat(math.tan(x.d), x.aa.tangent)
@@ -113,6 +116,10 @@ class SmartFloat(val d: Double, val aa: AffineForm) extends ScalaNumber with Sca
   def *(y: SmartFloat): SmartFloat = new SmartFloat(this.d * y.d, this.aa * y.aa)
   def /(y: SmartFloat): SmartFloat = new SmartFloat(this.d / y.d, this.aa / y.aa)
   def unary_-(): SmartFloat = new SmartFloat(-this.d, -this.aa)
+
+  def %(y: SmartFloat): SmartFloat = {
+    this - (y * (this/y).toInt)
+  }
 
   def addError(err: SmartFloat): SmartFloat = {
     return new SmartFloat(d, GeneralForm.addError(aa, err.aa))

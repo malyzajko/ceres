@@ -16,16 +16,18 @@ object FFT {
   var intervalRandomVector = iconvertArray(doubleRandomVector)
   */
 
-  //@return (double difference, affinefloat abs error, intervalfloat abs error)
-  def compareFFTAffineInterval(N: Int, seed: Long): (Double, Double, Double) = {
+  //@return (double difference, affinefloat abs error, intervalfloat abs error, smart abs error)
+  def compareFFTAffineInterval(N: Int, seed: Long): (Double, Double, Double, Double) = {
     var doubleRandomVector = randomVector(2*N, 10.0, seed)
     var affineRandomVector = aconvertArray(doubleRandomVector)
     var intervalRandomVector = iconvertArray(doubleRandomVector)
+    val smartRandomVector = sconvertArray(doubleRandomVector)
    
     val dblError = FFTDouble.test(doubleRandomVector)
     val resAffine = AffineFFT.test(affineRandomVector)
     val resInt = IntervalFFT.test(intervalRandomVector)
-    (dblError, resAffine._1, resInt._1)
+    val resSmart = SmartFFT.test(smartRandomVector)
+    (dblError, resAffine, resInt, resSmart)
   }
 
   // @return abs error
@@ -354,7 +356,7 @@ object AffineFFT {
 
   /** Accuracy check on FFT of data. Make a copy of data, Compute the FFT, then
     * the inverse and compare to the original.  Returns the rms difference.*/
-  def test(data: Array[AffineFloat]): (Double, Double) = {
+  def test(data: Array[AffineFloat]): Double = {
     val len: Int = data.length;
 
     // Make duplicate for comparison
@@ -367,7 +369,7 @@ object AffineFFT {
     
     //println("average abs.error: " + SmartRandomUtils.computeAvrgAbsError(data))
     //println("average rel.error: " + SmartRandomUtils.computeAvrgError(data))
-    return (SmartRandomUtils.computeMaxAbsError(data), SmartRandomUtils.computeMaxError(data))
+    return computeMaxAbsError(data)
     
     // Compute RMS difference.
     //var diff = AffineFloat(0.0)
@@ -546,7 +548,7 @@ object SmartFFT {
 
   /** Accuracy check on FFT of data. Make a copy of data, Compute the FFT, then
     * the inverse and compare to the original.  Returns the rms difference.*/
-  def test(data: Array[SmartFloat]): SmartFloat = {
+  def test(data: Array[SmartFloat]): Double = {
     val len: Int = data.length;
 
     // Make duplicate for comparison
@@ -557,7 +559,7 @@ object SmartFFT {
     inverse(data)
     
     //println("SmartFloat max deviation: " + SmartRandomUtils.computeMaxAbsError(data))
-    return SmartRandomUtils.computeMaxError(data)
+    return computeMaxAbsError(data)
     // Compute RMS difference.
     //var diff = SmartFloat(0.0)
     //for(i <- 0 until len) {
@@ -736,7 +738,7 @@ object IntervalFFT {
 
   /** Accuracy check on FFT of data. Make a copy of data, Compute the FFT, then
     * the inverse and compare to the original.  Returns the rms difference.*/
-  def test(data: Array[IntervalFloat]): (Double, Double) = {
+  def test(data: Array[IntervalFloat]): Double = {
     val len: Int = data.length;
 
     // Make duplicate for comparison
@@ -749,7 +751,7 @@ object IntervalFFT {
     
     //println("average abs.error: " + SmartRandomUtils.computeAvrgAbsError(data))
     //println("average rel.error: " + SmartRandomUtils.computeAvrgError(data))
-    return (SmartRandomUtils.computeMaxAbsError(data), SmartRandomUtils.computeMaxError(data))
+    return computeMaxAbsError(data)
     
     // Compute RMS difference.
     //var diff = AffineFloat(0.0)

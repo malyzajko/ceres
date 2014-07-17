@@ -12,7 +12,7 @@ The data size for the LARGE version of the benchmark uses a 1,000 x 1,000 matrix
 
 object DenseLU {
 
-  val pivoting: Boolean = true
+  val pivoting: Boolean = false
 
   def doubleLU(dim: Int) = {
     val A = randomMatrix(dim, dim)
@@ -59,19 +59,20 @@ object DenseLU {
   /*
     Compare results for computing FFT on a random matrix of dimension dim.
 
-    @return (affinefloat rel error, affinefloat abs error, interval rel error, interval abs error)
+    @return (affinefloat abs error, interval abs error, smart abs error)
   */
-  def compareLUAffineInterval(dim: Int, seed: Long): (Double, Double, Double, Double) = {
+  def compareLUAffineInterval(dim: Int, seed: Long): (Double, Double, Double) = {
     var doubleMatrix = randomSquareMatrix(dim, 10.0, seed)
     var affineMatrix = aconvertMatrix(doubleMatrix)
     var intervalMatrix = iconvertMatrix(doubleMatrix)
+    val smartMatrix = sconvertMatrix(doubleMatrix)
     
-    val sA = affineMatrix
-    val slu = acopyMatrix(sA)
-    val spivot: Array[Int] = Array.fill(dim){0}
-    AffineDenseLU.factor(slu, spivot)
+    val aA = affineMatrix
+    val alu = acopyMatrix(aA)
+    val apivot: Array[Int] = Array.fill(dim){0}
+    AffineDenseLU.factor(alu, apivot)
     
-    val sverif = AffineDenseLU.verify(sA, slu, spivot)
+    val averif = AffineDenseLU.verify(aA, alu, apivot)
     
     val iA = intervalMatrix
     val ilu = icopyMatrix(iA)
@@ -80,7 +81,15 @@ object DenseLU {
     
     val iverif = IntervalDenseLU.verify(iA, ilu, ipivot)
     
-    (sverif._1, sverif._2, iverif._1, iverif._1) 
+    val sA = smartMatrix
+    val slu = scopyMatrix(sA)
+    val spivot: Array[Int] = Array.fill(dim){0}
+    SmartDenseLU.factor(slu, spivot)
+    
+    
+    val sverif = SmartDenseLU.verify(sA, slu, spivot)
+    
+    (averif, iverif, sverif) 
   }
 }
 
@@ -411,7 +420,7 @@ object SmartDenseLU {
 
 
   def verify(A: Array[Array[SmartFloat]], lu: Array[Array[SmartFloat]], pivot: Array[Int]): 
-    SmartFloat = {
+    Double = {
     val N = A.length
     val b: Array[SmartFloat] = srandomVector(N)
     val x = scopyArray(b)
@@ -421,8 +430,7 @@ object SmartDenseLU {
   
   
     //println("SmartFloat max absolute error: " + SmartRandomUtils.computeMaxAbsError(x))
-    
-    return SmartRandomUtils.computeMaxError(x)
+    return computeMaxAbsError(x)
     //return normabs(b, matvec(A,x))/N
 
     //val EPS = 1.0e-12
@@ -600,7 +608,7 @@ object AffineDenseLU {
 
 
   def verify(A: Array[Array[AffineFloat]], lu: Array[Array[AffineFloat]], pivot: Array[Int]): 
-    (Double, Double) = {
+    Double = {
     val N = A.length
     val b: Array[AffineFloat] = arandomVector(N)
     val x = acopyArray(b)
@@ -613,7 +621,7 @@ object AffineDenseLU {
     //aprintVector(x)
     //println("average abs.error: " + SmartRandomUtils.computeAvrgAbsError(x))
     //println("average rel.error: " + SmartRandomUtils.computeAvrgError(x))
-    return (SmartRandomUtils.computeMaxError(x), SmartRandomUtils.computeMaxAbsError(x))
+    return computeMaxAbsError(x)
     //return normabs(b, matvec(A,x))/N
 
     //val EPS = 1.0e-12
@@ -804,7 +812,7 @@ object IntervalDenseLU {
 
 
   def verify(A: Array[Array[IntervalFloat]], lu: Array[Array[IntervalFloat]], pivot: Array[Int]): 
-    (Double, Double) = {
+    Double = {
     val N = A.length
     val b: Array[IntervalFloat] = irandomVector(N)
     val x = icopyArray(b)
@@ -817,7 +825,7 @@ object IntervalDenseLU {
     //aprintVector(x)
     //println("average abs.error: " + SmartRndomUtils.computeAvrgAbsError(x))
     //println("average rel.error: " + SmartRandomUtils.computeAvrgError(x))
-    return (SmartRandomUtils.computeMaxError(x), SmartRandomUtils.computeMaxAbsError(x))
+    return computeMaxAbsError(x)
     //return normabs(b, matvec(A,x))/N
 
     //val EPS = 1.0e-12

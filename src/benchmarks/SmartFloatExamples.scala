@@ -13,16 +13,27 @@ import SmartFloat._
 object SmartFloatExamples extends App {
 
   triangleExampleSection
-  //quadraticEquation
 
-  //quadraticEquationSmart
+  springSimulation(0.1, 1.0)
+  springSimulation(0.125, 1.0)
+  springSimulation(0.01, 1.0)
+
+  //quadraticEquation
+  println()
+  println(quadraticEquationSmart)
 
   
-
+  //require(-100.0 <= u && u <= 100 && 20 <= v && v <= 20000 && -30 <= T && T <= 50)
+  println()
+  println("doppler: " + doppler(0 +/- 100, 10010 +/- 9990, 10 +/- 40))
   //cubeRoot
   
   
-  
+  println()
+  bSplines(0.5 +/- 0.5)
+
+  println()
+  turbine
   
   /**
    * Computes the area of a triangle with Kahan's method.
@@ -223,7 +234,7 @@ object SmartFloatExamples extends App {
     println("smarter r1 = " + rk1.toStringWithErrors + " , r2 = " + rk2.toStringWithErrors)
   }
 
-  def quadraticEquationSmart {
+  def quadraticEquationSmart: (SmartFloat, SmartFloat, SmartFloat, SmartFloat) = {
     import SmartFloat._
         
     // var a = SmartFloat(2.999)
@@ -253,13 +264,35 @@ object SmartFloatExamples extends App {
     }
   
     println("smarter r1 = " + rk1.toStringWithErrors + " , r2 = " + rk2.toStringWithErrors)
+    (r1, r2, rk1, rk2)
   }
   
   
+  def doppler(u: SmartFloat, v: SmartFloat, T: SmartFloat): SmartFloat = {
+
+    val t1 = 331.4 + 0.6 * T
+    (- (t1) *v) / ((t1 + u)*(t1 + u))
+
+  }
   
+   def bSplines(u: SmartFloat) = {
+    
+    val one = SmartFloat(1.0)
+    
+    val b0 = ((one - u) * (one - u) * (one  - u))/6.0
   
+    val b1 = (u*u*u*3 - u*u*6 + 4.0)/6.0
   
-  
+    val b2 = (u*u*u*(-3.0) + u*u*3 + u*3 + 1)/6.0
+    
+    val b3 = (-u*u*u)/6.0
+
+    println("b0: " + b0)
+    println("b1: " + b1)
+    println("b2: " + b2)
+    println("b3: " + b3)  
+  }
+
   /**
    * Analyzer the roundoff from the triangle example.
    * For this to work, you need to change the second import statement in SmartFloat.scala from
@@ -277,20 +310,22 @@ object SmartFloatExamples extends App {
   }
 
   
-  /**
-   * This is not in the paper, but fun.
-   */
-  def rumpsFunction = {
-    import AffineFloat._
-    
-    val x = AffineFloat(77617.0)
-    val y = AffineFloat(33096.0)
-    
-    val f = (333.75 - x*x) * (y*y*y*y*y*y) + x*x *(11.0*x*x*y*y - 121.0*y*y*y*y - 2.0) + 5.5 * y*y*y*y*y*y*y*y + x/(2.0*y)
-    println("f : " + f.interval)
   
+  
+
+  def turbine = {
+    val v = -2.4 +/- 2.1
+    val w = 0.65 +/- 0.25
+    val r = 5.8 +/- 2.0
+
+    val t1 = 3 + 2/(r*r) - 0.125*(3-2*v)*(w*w*r*r)/(1-v) - 4.5
+    val t2 = 6*v - 0.5 * v * (w*w*r*r) / (1-v) - 2.5
+    val t3 = 3 - 2/(r*r) - 0.125 * (1+2*v) * (w*w*r*r) / (1-v) - 0.5
+  
+    println("turbine1: " + t1)
+    println("turbine2: " + t2)
+    println("turbine3: " + t3)
   }
-  
 
   /*def triangleExampleSection = {
     println("SmartFloat: textbook")

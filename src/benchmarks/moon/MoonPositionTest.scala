@@ -17,13 +17,14 @@ import java.util.Scanner;
 import scala.io.Source
 
 import ceres.common.{QuadDouble => QD}
-import smartfloat.{AffineFloat => AF, IntervalFloat => IF}
+import smartfloat.{AffineFloat => AF, IntervalFloat => IF, SmartFloat => SF}
 
 object MoonPositionTest extends App {
 
-  quadDoublePosition
+  //quadDoublePosition
   affinePosition
-  intervalPosition
+  //intervalPosition
+  //smartPosition
 
 /*  test("moon position at 20120210") {
     println("\nDouble")
@@ -58,12 +59,13 @@ object MoonPositionTest extends App {
     println(res._3 + "    " + res._3.interval)
     println(res._6 + "    " + res._6.interval)
 
-    println("\nAffineFloat2")
+    println(AF.opCounts)
+    /*println("\nAffineFloat2")
     //val res = Moon.moonPosition(2012, 3, 14, 0)
     res = AFMoon2.moonPosition(2012, 2, 10, 0)
     println(res._3 + "    " + res._3.interval)
     println(res._6 + "    " + res._6.interval)
-
+    */
   }
 
   def intervalPosition = {
@@ -80,6 +82,16 @@ object MoonPositionTest extends App {
     println(res._3 + "    " + res._3.interval)
     println(res._6 + "    " + res._6.interval)
     */
+  }
+
+  def smartPosition = {
+    println("smart double moon position at 20120210")
+    println("\nSmartFloat")
+    //val res = Moon.moonPosition(2012, 3, 14, 0)
+    var res = SFMoon.moonPosition(2012, 2, 10, 0)
+    println(res._3 + "    " + res._3.interval)
+    println(res._6 + "    " + res._6.interval)
+
   }
 
 
@@ -154,7 +166,7 @@ object Moon {
 		var A1 = 119.75 + 131.849 * T;
 		A1 = A1%360.0;
 		A1 = A1*Pi/180.0;
-
+//--30
 		var A2 = 53.09 + 479264.290 * T;
 		A2 = A2%360.0;
 		A2 = A2*Pi/180.0;
@@ -184,7 +196,7 @@ object Moon {
 				coeffSigr = java.lang.Double.parseDouble(ll(5));
 
 				E = 1-0.002516*T-0.0000074*math.pow(T,2);
-
+//--50
 				if ((coeffM == 1) || (coeffM == -1)){
 					sigl = sigl + E * coeffSigl * math.sin(D*coeffD+M*coeffM+Ml*coeffMl+F*coeffF);
 					sigr = sigr + E * coeffSigr * math.cos(D*coeffD+M*coeffM+Ml*coeffMl+F*coeffF);
@@ -243,7 +255,7 @@ object Moon {
 		sigl = sigl + 3958.0*math.sin(A1)+1962.*math.sin(Ll-F)+318.0*math.sin(A2);
 		sigb = sigb - 2235.0*math.sin(Ll)+382.0*math.sin(A3)+175.0*math.sin(A1-F)+
       175.0*math.sin(A1+F)+127.0*math.sin(Ll-Ml)-115.0*math.sin(Ll+Ml);
-
+//--90
     //println("\nAfter correction by Jupiter and mates:")
     //println("sigl: " + sigl);
     //println("sigb: " + sigb);
@@ -1247,6 +1259,8 @@ object AFMoon {
 		dphi = dphi%360.0;
 		var applbda = lbda + dphi;
 		applbda = applbda%360.0;
+    println(" ---> aa: " + applbda)
+
 
 		// True obliquity of the ecliptic
 		val eps0 = (AF(23.0)+AF(26.0)/60.0+AF(21.448)/3600.0)-AF(46.8150)/3600.0*T-AF(0.00059)/3600.0*pow2(T)+
@@ -1254,6 +1268,7 @@ object AFMoon {
 		val deps = AF(9.20)/3600.0*cos(Pi*omega/180.0)+AF(0.57)/3600.0*cos(2.0*L)+
       AF(0.10)/3600.0*cos(2.0*Ll)-AF(0.09)/3600.0*cos(2*Pi*omega/180.0);
 		var eps = eps0 + deps;
+    println("eps: " + eps)
 		eps = eps % 360.0;
 
 		val alpha = darctan((sin(applbda*Pi/180.0)*cos(eps*Pi/180.0)-
@@ -1546,5 +1561,251 @@ object IFMoon {
 			return atan(y/x)*180.0/Pi;
 		}
 	}
+
+}
+
+
+object SFMoon {
+  import SF._
+
+  val keyb = new Scanner(System.in);
+
+  def moonPosition(y: Int, m: Int, day: Int, minutes: Int, hours: Int = 12):
+    (SF, SF, SF, SF, SF, SF) = {
+    val Pi = SF(3.141592653589793)
+    var year = y
+    var month = m
+    println("Compute for the " + day + "-" + month +
+        "-" + year + " at " + hours + ":" + minutes);
+
+    // Compute MJD:
+    if(month == 1 || month == 2){
+      year -= 1;
+      month += 12;
+    }
+
+    val A = (year/100.0).toInt;
+    val B = 2-A+(A/4.0).toInt;
+    var julianDay: SF = (365.25*(year+4716)).toInt+(30.6001*(month+1)).toInt+day+B-SF(1524.5);
+    julianDay = julianDay+SF(hours)/24.0;
+
+    //println("JD = " + julianDay);
+
+    val T: SF = (julianDay-2451545.0)/36525.0;
+    //println("T: " + T);
+
+    // Longitude average of Moon:
+    var Ll = SF(218.3164591)+SF(481267.88134236)*T-0.0013268*pow2(T)+pow3(T)/538841.0-
+      pow4(T)/65194000.0;
+    Ll = Ll%360.0;
+    Ll = Ll*Pi/180.0;
+    //println("Ll: " + Ll);
+
+    // Elongation average ofMmoon:
+    var D = SF(297.8502042)+445267.1115168*T-0.0016300*pow2(T)+pow3(T)/545868.0-
+      pow4(T)/113065000.0;
+    D = D%360.0;
+    D = D*Pi/180.0;
+    //println("D: " + D);
+
+    // Anomaly average of Sun:
+    var M = SF(357.5291092)+35999.0502909*T-0.0001536*pow2(T)+pow3(T)/24490000.0;
+    M = M%360.0;
+    M = M*Pi/180.0;
+    //println("M: " + M);
+
+    // Anomaly average of Moon:
+    var Ml = SF(134.9634114)+477198.8676313*T+0.0089970*pow2(T)+pow3(T)/69699.0-
+      pow4(T)/14712000.0;
+    Ml = Ml%360.0;
+    Ml = Ml*Pi/180.0;
+    //println("Ml: " + Ml);
+
+    // Argument of latitude of the Moon (Average distance of the moon of ascendant node):
+    var F = SF(93.2720993)+483202.0175273*T-0.0034029*pow2(T)-pow3(T)/3526000.0+
+      pow4(T)/863310000.0;
+    F = F%360.0;
+    F = F*Pi/180.0;
+    //println("F: " + F);
+
+    // 3 other arguments necessary (in degrees):
+    var A1 = SF(119.75) + 131.849 * T;
+    A1 = A1%360.0;
+    A1 = A1*Pi/180.0;
+
+    var A2 = SF(53.09) + 479264.290 * T;
+    A2 = A2%360.0;
+    A2 = A2*Pi/180.0;
+
+    var A3 = SF(313.45) + 481266.484 * T;
+    A3 = A3%360.0;
+    A3=A3*Pi/180.0;
+    //println("A1: " + A1);
+    //println("A2: " + A2);
+    //println("A3: " + A3);
+
+    var ll: Array[String] = null;
+    var coeffD, coeffM, coeffMl, coeffF = 0;
+    var coeffSigl, coeffSigr, coeffSigb, E = SF(0.0);
+    var sigr, sigl, sigb = SF(0.0);
+
+    // Read periodic terms of longitude (Sigl) and moon's distance (Sigr):
+    for(line <- Source.fromFile("src/benchmarks/moon/Moontable1.rdb").getLines().drop(3)) {
+      ll = line.split("\t");
+
+      try {
+        coeffD = Integer.parseInt(ll(0));
+        coeffM = Integer.parseInt(ll(1));
+        coeffMl = Integer.parseInt(ll(2));
+        coeffF = Integer.parseInt(ll(3));
+        coeffSigl = SF(java.lang.Double.parseDouble(ll(4)));
+        coeffSigr = SF(java.lang.Double.parseDouble(ll(5)));
+
+        E = SF(1)-0.002516*T-0.0000074*pow2(T);
+
+        if ((coeffM == 1) || (coeffM == -1)){
+          sigl = sigl + E * coeffSigl * sin(D*coeffD+M*coeffM+Ml*coeffMl+F*coeffF);
+          sigr = sigr + E * coeffSigr * cos(D*coeffD+M*coeffM+Ml*coeffMl+F*coeffF);
+        }
+        else if ((coeffM == 2) || (coeffM == -2)){
+          sigl = sigl + pow2(E) * coeffSigl * sin(D*coeffD+M*coeffM+Ml*coeffMl+F*coeffF);
+          sigr = sigr + pow2(E) * coeffSigr * cos(D*coeffD+M*coeffM+Ml*coeffMl+F*coeffF);
+        }
+        else {
+          sigl = sigl + coeffSigl * sin(D*coeffD+Ml*coeffMl+F*coeffF);
+          sigr = sigr + coeffSigr * cos(D*coeffD+Ml*coeffMl+F*coeffF);
+        }
+
+      } catch {
+        case e: NumberFormatException =>
+          println("Number format exception in MoonTable1");
+      }
+    }
+    //println("sigl: " + sigl);
+    //println("sigr: " + sigr);
+
+
+    for(line <- Source.fromFile("src/benchmarks/moon/Moontable2.rdb").getLines().drop(3)) {
+      ll = line.split("\t");
+
+      try {
+        coeffD = Integer.parseInt(ll(0));
+        coeffM = Integer.parseInt(ll(1));
+        coeffMl = Integer.parseInt(ll(2));
+        coeffF = Integer.parseInt(ll(3));
+        coeffSigb = SF(java.lang.Double.parseDouble(ll(4)));
+
+        E = SF(1.0)-0.002516*T-0.0000074*pow2(T);
+
+        if ((coeffM == 1) || (coeffM == -1)){
+          sigb = sigb + E * coeffSigb * sin(D*coeffD+M*coeffM+Ml*coeffMl+F*coeffF);
+        }
+
+        else if ((coeffM == 2) || (coeffM == -2)){
+          sigb = sigb + pow2(E) * coeffSigb * sin(D*coeffD+M*coeffM+Ml*coeffMl+F*coeffF);
+        }
+
+        else {
+          sigb = sigb + coeffSigb * sin(D*coeffD+Ml*coeffMl+F*coeffF);
+        }
+
+      } catch {
+        case e: NumberFormatException =>
+          println("Number format exception in MoonTable2");
+      }
+    }
+    //println("sigb: " + sigb);
+
+
+    // Additional terms due to Jupiter, Venus and flatening of Earth:
+    sigl = sigl + 3958.0*sin(A1)+1962.*sin(Ll-F)+318.0*sin(A2);
+    sigb = sigb - 2235.0*sin(Ll)+382.0*sin(A3)+175.0*sin(A1-F)+
+      175.0*sin(A1+F)+127.0*sin(Ll-Ml)-115.0*sin(Ll+Ml);
+
+    //println("\nAfter correction by Jupiter and mates:")
+    //println("sigl: " + sigl);
+    //println("sigb: " + sigb);
+
+
+    // Moon coordinates in degrees
+    var lbda = (Ll*180/Pi + sigl/1000000.0);
+    lbda = lbda%360.0;
+    var beta = (sigb/1000000.0);
+    beta=beta%360.0;
+
+    // Distance Moon - center of earth (in KM):
+    val GrdDelta = SF(385000.56) + sigr/1000.0;
+
+    // Apparent lambda by adding to lambda the nutation in longitude:
+    var L=SF(280.4665)+36000.7698*T;
+    L = L%360.0;
+    L = L*Pi/180.0;
+
+    // Longitude of the mean ascending node
+    var omega=SF(125.0445550)-1934.1361849*T+0.0020762*pow2(T)+pow3(T)/467410.0-
+      pow4(T)/60616000.0;
+    omega = omega%360.0;
+    var dphi = SF(-17.20)/3600.0*sin(Pi*omega/180.0)-SF(1.32)/3600.0*sin(2.0*L)-
+      SF(0.23)/3600.0*sin(2.0*Ll)+SF(0.21)/3600.0*sin(2.0*Pi*omega/180.0);
+    dphi = dphi%360.0;
+    var applbda = lbda + dphi;
+    applbda = applbda%360.0;
+    println("---> sm" + applbda)
+
+    // True obliquity of the ecliptic
+    val eps0 = (SF(23.0)+SF(26.0)/60.0+SF(21.448)/3600.0)-SF(46.8150)/3600.0*T-SF(0.00059)/3600.0*pow2(T)+
+      SF(0.001813)/3600.0*pow3(T);
+    val deps = SF(9.20)/3600.0*cos(Pi*omega/180.0)+SF(0.57)/3600.0*cos(2.0*L)+
+      SF(0.10)/3600.0*cos(2.0*Ll)-SF(0.09)/3600.0*cos(2*Pi*omega/180.0);
+    var eps = eps0 + deps;
+    println("eps: " + eps)
+    eps = eps % 360.0;
+
+    val alpha = darctan((sin(applbda*Pi/180.0)*cos(eps*Pi/180.0)-
+          tan(beta*Pi/180.0)*sin(eps*Pi/180.0)),cos(applbda*Pi/180.0));
+    var delta = asin(sin(beta*Pi/180.0)*cos(eps*Pi/180.0)+
+        cos(beta*Pi/180.0)*sin(eps*Pi/180.0)*sin(applbda*Pi/180.0));
+    delta = delta*180.0/Pi;
+
+    val halpha = (alpha/15.0).toInt;
+    val mnalpha = ((alpha/15.0-halpha)*60.0).toInt;
+    val salpha = ((alpha/15.0-halpha)*60.0-mnalpha)*60.0;
+
+    if (delta>90.0){
+      delta = delta-360.0;
+    }
+    else {
+      delta = 1.0*delta;
+    }
+    println("Alpha: " + alpha + "   " + alpha.interval)
+    println("Delta: " + delta + "   " + delta.interval)
+    val ddelta = (delta).toInt;
+    val mndelta = abs(((delta-ddelta)*60.0).toInt);
+    val sdelta = abs(((delta-ddelta)*60.-((delta-ddelta)*60.).toInt)*60.0);
+
+    println("Moon coordinates:");
+    println("Alpha = %sh %sm %s ".format(halpha.toString, mnalpha.toString, salpha.toString))
+    println("Delta = %sd %sm %s ".format(ddelta.toString, mndelta.toString, sdelta.toString))
+    return (halpha, mnalpha, salpha, ddelta, mndelta, sdelta)
+  }
+
+  def darctan(y: SF, x: SF): SF = {
+    val Pi = SF(3.141592653589793)
+    if((x == 0) && (y == 0)){
+      return SF(0.0);
+    }
+
+    else if ((y < 0.0) && (x > 0.0)){
+      return (atan(y/x)*180.0/Pi)+360.0;
+    }
+
+    else if (x < 0.0){
+      return (atan(y/x)*180.0/Pi)+180.0;
+    }
+
+    else {
+      return atan(y/x)*180.0/Pi;
+    }
+  }
 
 }

@@ -15,6 +15,30 @@ object AffineFloatBenchmarks extends App {
     case "lu" => runDenseLU
     case "fft" => runFFT
     case "packing" => runPacking
+    case "rump" => rumpsFunction
+  }
+
+  /**
+   * This is not in the paper, but fun.
+   */
+  def rumpsFunction = {
+    import AffineFloat._
+    
+    {
+      val x = AffineFloat(77617.0)
+      val y = AffineFloat(33096.0)
+    
+      val f = (333.75 - x*x) * (y*y*y*y*y*y) + x*x *(11.0*x*x*y*y - 121.0*y*y*y*y - 2.0) + 5.5 * y*y*y*y*y*y*y*y + x/(2.0*y)
+      println("rumps function: \nf : " + f.toStringWithAbsErrors)
+    }
+    import ceres.common.{QuadDouble => QD}
+    {
+      val x = QD(77617.0)
+      val y = QD(33096.0)
+    
+      val f = (333.75 - x*x) * (y*y*y*y*y*y) + x*x *(11.0*x*x*y*y - 121.0*y*y*y*y - 2.0) + 5.5 * y*y*y*y*y*y*y*y + x/(2.0*y)
+      println("rumps function: \nf : " + f)
+    }
   }
 
   def runPacking = {
@@ -48,6 +72,15 @@ object AffineFloatBenchmarks extends App {
     println("IntervalFloat, 5s")
     println("dt=0.01     " + printCompleteIntervalFloat( intervalSimulate(500, 0.01) ))
     println("dt=0.015625 " + printCompleteIntervalFloat( intervalSimulate(320, 0.015625) ))
+
+
+    println("SmartFloat, 1s")
+    println("dt=0.01     " + printCompleteSmartFloat( smartSimulate(100, 0.01) ))
+    println("dt=0.015625 " + printCompleteSmartFloat( smartSimulate(64, 0.015625) ))
+
+    println("SmartFloat, 5s")
+    println("dt=0.01     " + printCompleteSmartFloat( smartSimulate(500, 0.01) ))
+    println("dt=0.015625 " + printCompleteSmartFloat( smartSimulate(320, 0.015625) ))
     
   }
 
@@ -68,6 +101,14 @@ object AffineFloatBenchmarks extends App {
     println("10 ite:r " + printCompleteIntervalFloat( approximateInterval(10) ))
     println("15 ite:r " + printCompleteIntervalFloat( approximateInterval(15) ))
     println("20 ite:r " + printCompleteIntervalFloat( approximateInterval(20) ))
+
+
+    println("SmartFloat")
+    println("2 iter:  " + printCompleteSmartFloat( approximateSmart(2) ))
+    println("5 iter:  " + printCompleteSmartFloat( approximateSmart(5) ))
+    println("10 ite:r " + printCompleteSmartFloat( approximateSmart(10) ))
+    println("15 ite:r " + printCompleteSmartFloat( approximateSmart(15) ))
+    println("20 ite:r " + printCompleteSmartFloat( approximateSmart(20) ))
 
   }
 
@@ -92,12 +133,13 @@ object AffineFloatBenchmarks extends App {
     import DenseLU._
 
     var seeds = Seq(4357, 4999, 7817, 2447, 1013)
+    //var seeds = Seq(7817)
 
     println("Running DenseLU with pivoting: " + DenseLU.pivoting)
 
     seeds.foreach { seed =>
       println("\nseed: " + seed)
-      println("dim 5 : " + compareLUAffineInterval(5, seed))
+      println("dim 2 : " + compareLUAffineInterval(5, seed))
       println("dim 10: " + compareLUAffineInterval(10, seed))
       println("dim 15: " + compareLUAffineInterval(15, seed))
     }
@@ -124,6 +166,10 @@ object AffineFloatBenchmarks extends App {
   }
 
   private def printCompleteIntervalFloat(in: IntervalFloat): String = {
+    in.d + " " + in.interval + " rel: " + in.relError + " abs: " + in.absError
+  }
+
+  private def printCompleteSmartFloat(in: SmartFloat): String = {
     in.d + " " + in.interval + " rel: " + in.relError + " abs: " + in.absError
   }
 

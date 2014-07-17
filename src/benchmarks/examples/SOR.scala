@@ -24,15 +24,17 @@ object SOR {
   var smartMatrix100 = sconvertMatrix(doubleMatrix100)
   var intervalMatrix100 = iconvertMatrix(doubleMatrix100)
 
-  //@return (max rel err affine, max abs error affine, max rel error interval, max abs error interval)
-  def compareAffineInterval(numIter: Int, seed: Long): (Double, Double, Double, Double) = {
+  //@return (max abs error affine, max abs error interval, max abs error smart)
+  def compareAffineInterval(numIter: Int, seed: Long): (Double, Double, Double) = {
   	val doubleM = randomSquareMatrix(100, 10.0, seed)
   	val affineM = aconvertMatrix(doubleM)
   	val intervalM = iconvertMatrix(doubleM)
+  	val smartM = sconvertMatrix(doubleM)
 
   	val (relAA, absAA) = executeAffine(1.25, affineM, numIter)
   	val (relInt, absInt) = executeInterval(1.25, intervalM, numIter)
-  	(relAA, absAA, relInt, absInt)
+  	val absSM = executeSmart(1.25, smartM, numIter)
+  	(absAA, absInt, absSM)
   }
 
 
@@ -100,8 +102,8 @@ object SOR {
 			}
 		}
 		
-		val maxRel = SmartRandomUtils.computeMaxRelError(G)
-		val maxAbs = SmartRandomUtils.computeMaxAbsError(G)
+		val maxRel = computeMaxRelError(G)
+		val maxAbs = computeMaxAbsError(G)
 		(maxRel, maxAbs)
 	}
 
@@ -131,7 +133,7 @@ object SOR {
 		//if we want the computed error:
 		//println("computed max error for " + smartfloats.tools.AffineForm.maxNoiseCount + ": " + 
 		//  SmartRandomUtils.computeMaxError(G))
-		return SmartRandomUtils.computeMaxError(G)
+		return computeMaxAbsError(G)
 	}
 
 	def executeInterval(omega: IntervalFloat, G: Array[Array[IntervalFloat]], num_iterations: Int): (Double,Double) = {
@@ -157,8 +159,8 @@ object SOR {
 			}
 		}
 		
-		val maxRel = SmartRandomUtils.computeMaxRelError(G)
-		val maxAbs = SmartRandomUtils.computeMaxAbsError(G)
+		val maxRel = computeMaxRelError(G)
+		val maxAbs = computeMaxAbsError(G)
 		(maxRel, maxAbs)
 	}
 }

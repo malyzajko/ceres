@@ -26,7 +26,7 @@ object PerformanceBenchmark extends PerformanceTest {
   /* tests */
 
   //val integrationSteps = Gen.range("size")(100, 1000, 100)
-  val integrationSteps = Gen.range("size")(100, 300, 100)
+  val integrationSteps = Gen.range("size")(100, 1000, 100)
 
   performance of "NBody" config(
       exec.jvmflags -> "-Xmx2048m -Xms2048m -XX:CompileThreshold=100 -Djava.library.path=lib/"

@@ -3,6 +3,7 @@ package benchmarks
 
 import scala.util.Random
 import smartfloat.{AffineFloat,SmartFloat,IntervalFloat}
+import scala.language.reflectiveCalls
 
 object SmartRandomUtils {
 
@@ -89,33 +90,7 @@ object SmartRandomUtils {
     print("]\n")
 	}
   
-  def computeMaxError(m: Array[Array[SmartFloat]]): Double = {
-    var max = 0.0
-    m.foreach{ row =>
-      row.foreach {entry => 
-        if(entry.relError > max) max = entry.relError
-      }    
-    }   
-    return max
-  }
-  
-  def computeMaxError(m: Array[SmartFloat]): Double = {
-    var max = 0.0
-    m.foreach{ entry =>
-      if(entry.relError > max) max = entry.relError    
-    }   
-    return max
-  }
-  
-  def computeMaxAbsError(m: Array[SmartFloat]): Double = {
-    var max = 0.0
-    m.foreach{ entry =>
-      if(entry.relError > max) max = entry.absError    
-    }   
-    return max
-  }
-  
-  
+
   //#################################################################
   def arandomVector(n: Int): Array[AffineFloat] = {
 	  val A = Array.fill(n){AffineFloat(0.0)}
@@ -197,27 +172,7 @@ object SmartRandomUtils {
     print("]\n")	
 	}
   
-  def computeMaxRelError(m: Array[Array[AffineFloat]]): Double = {
-    var max = -1.0
-    m.foreach{ row =>
-      row.foreach {entry =>
-       if(entry.relError > max) max = entry.relError
-      }    
-    }   
-    return max
-  }
-
-  def computeMaxAbsError(m: Array[Array[AffineFloat]]): Double = {
-    var max = -1.0
-    m.foreach{ row =>
-      row.foreach {entry =>
-       if(entry.absError > max) max = entry.absError
-      }    
-    }   
-    return max
-  }
-  
-  def computeAvrgError(m: Array[Array[AffineFloat]]): Double = {
+ /* def computeAvrgError(m: Array[Array[AffineFloat]]): Double = {
     var sum = 0.0
     var count = 0
     m.foreach{ row =>
@@ -248,23 +203,8 @@ object SmartRandomUtils {
         count += 1
     }   
     return sum/count
-  }
+  }*/
   
-  def computeMaxError(m: Array[AffineFloat]): Double = {
-    var max = 0.0
-    m.foreach{ entry =>
-      if(entry.relError > max) max = entry.relError    
-    }   
-    return max
-  }
-  
-  def computeMaxAbsError(m: Array[AffineFloat]): Double = {
-    var max = 0.0
-    m.foreach{ entry =>
-      if(entry.relError > max) max = entry.absError    
-    }   
-    return max
-  }
   
   
   //#################################################################
@@ -342,26 +282,7 @@ object SmartRandomUtils {
     print("]\n")	
 	}
   
-  def computeMaxRelError(m: Array[Array[IntervalFloat]]): Double = {
-    var max = -1.0
-    m.foreach{ row =>
-      row.foreach {entry =>
-       if(entry.relError > max) max = entry.relError
-      }    
-    }   
-    return max
-  }
-
-  def computeMaxAbsError(m: Array[Array[IntervalFloat]]): Double = {
-    var max = -1.0
-    m.foreach{ row =>
-      row.foreach {entry =>
-       if(entry.absError > max) max = entry.absError
-      }    
-    }   
-    return max
-  }
-  
+  /*
   def computeAvrgError(m: Array[Array[IntervalFloat]]): Double = {
     var sum = 0.0
     var count = 0
@@ -393,24 +314,9 @@ object SmartRandomUtils {
         count += 1
     }   
     return sum/count
-  }
+  }*/
   
-  def computeMaxError(m: Array[IntervalFloat]): Double = {
-    var max = 0.0
-    m.foreach{ entry =>
-      if(entry.relError > max) max = entry.relError    
-    }   
-    return max
-  }
   
-  def computeMaxAbsError(m: Array[IntervalFloat]): Double = {
-    var max = 0.0
-    m.foreach{ entry =>
-      if(entry.relError > max) max = entry.absError    
-    }   
-    return max
-  }
-
 }
 
 

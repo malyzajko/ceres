@@ -60,7 +60,7 @@ package object smartfloat {
   var printPackingInfo = false
 
   /** Limit on number of noise symbols. */
-  var maxNoiseCount = 100      //Maximum number of noise symbols we want to accumulate.
+  var maxNoiseCount = 42      //Maximum number of noise symbols we want to accumulate.
 
   /** Threshold packing is computed as a * avrg + b * stdDev. This is the parameter a. */
   var packingFactor = 1.0
