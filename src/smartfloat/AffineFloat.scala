@@ -35,22 +35,20 @@ object AffineFloat {
   val E = AffineFloat(math.E)
   val Pi = AffineFloat(math.Pi)
 
-  def sqrt(x: AffineFloat): AffineFloat = {incr("divsqrt"); new AffineFloat(math.sqrt(x.d), x.aa.squareRoot)}
-  def log(x: AffineFloat): AffineFloat = {incr("other"); new AffineFloat(math.log(x.d), x.aa.ln)}
-  def exp(x: AffineFloat): AffineFloat = {incr("other"); new AffineFloat(math.exp(x.d), x.aa.exponential)}
-  def pow(x: AffineFloat, y: AffineFloat): AffineFloat = {
-    incr("other")    
-    new AffineFloat(math.pow(x.d, y.d), (y.aa * x.aa.ln).exponential)}
+  def sqrt(x: AffineFloat): AffineFloat = {/*incr("divsqrt"); */ new AffineFloat(math.sqrt(x.d), x.aa.squareRoot)}
+  def log(x: AffineFloat): AffineFloat = {/*incr("other");*/ new AffineFloat(math.log(x.d), x.aa.ln)}
+  def exp(x: AffineFloat): AffineFloat = {/*incr("other");*/ new AffineFloat(math.exp(x.d), x.aa.exponential)}
+  def pow(x: AffineFloat, y: AffineFloat): AffineFloat = {/* incr("other") */ new AffineFloat(math.pow(x.d, y.d), (y.aa * x.aa.ln).exponential)}
   def pow2(x: AffineFloat): AffineFloat = x * x
   def pow3(x: AffineFloat): AffineFloat = x * x * x
   def pow4(x: AffineFloat): AffineFloat = x * x * x * x
 
-  def cos(x: AffineFloat): AffineFloat = {incr("trig"); new AffineFloat(math.cos(x.d), x.aa.cosine)}
-  def sin(x: AffineFloat): AffineFloat = {incr("trig"); new AffineFloat(math.sin(x.d), x.aa.sine)}
-  def tan(x: AffineFloat): AffineFloat = {incr("trig"); new AffineFloat(math.tan(x.d), x.aa.tangent)}
-  def acos(x: AffineFloat): AffineFloat = {incr("trig"); new AffineFloat(math.acos(x.d), x.aa.arccosine)}
-  def asin(x: AffineFloat): AffineFloat = {incr("trig"); new AffineFloat(math.asin(x.d), x.aa.arcsine)}
-  def atan(x: AffineFloat): AffineFloat = {incr("trig"); new AffineFloat(math.atan(x.d), x.aa.arctangent)}
+  def cos(x: AffineFloat): AffineFloat = {/*incr("trig");*/ new AffineFloat(math.cos(x.d), x.aa.cosine)}
+  def sin(x: AffineFloat): AffineFloat = {/*incr("trig");*/ new AffineFloat(math.sin(x.d), x.aa.sine)}
+  def tan(x: AffineFloat): AffineFloat = {/*incr("trig");*/ new AffineFloat(math.tan(x.d), x.aa.tangent)}
+  def acos(x: AffineFloat): AffineFloat = {/*incr("trig");*/ new AffineFloat(math.acos(x.d), x.aa.arccosine)}
+  def asin(x: AffineFloat): AffineFloat = {/*incr("trig");*/ new AffineFloat(math.asin(x.d), x.aa.arcsine)}
+  def atan(x: AffineFloat): AffineFloat = {/*incr("trig");*/ new AffineFloat(math.atan(x.d), x.aa.arctangent)}
   def random: AffineFloat = new AffineFloat(math.random)  //constant
 
   //Other functions. We'll skip for now: ceil, floor, signum, round.
@@ -113,20 +111,15 @@ class AffineFloat(val d: Double, val aa: AffineForm) extends ScalaNumber
              else if (ff == PlusInf || ff == MinusInf) FullForm
              else new CenterForm(ff))
 
-  def +(y: AffineFloat): AffineFloat = {
-    incr("+")
+  def +(y: AffineFloat): AffineFloat = {/*incr("+")*/
     new AffineFloat(this.d + y.d, this.aa + y.aa)}
-  def -(y: AffineFloat): AffineFloat =  {
-    incr("+")
+  def -(y: AffineFloat): AffineFloat = {//incr("+")
     new AffineFloat(this.d - y.d, this.aa - y.aa)}
-  def *(y: AffineFloat): AffineFloat = {
-    incr("*")
+  def *(y: AffineFloat): AffineFloat = {//incr("*")
     new AffineFloat(this.d * y.d, this.aa * y.aa)}
-  def /(y: AffineFloat): AffineFloat = {
-    incr("divsqrt")
+  def /(y: AffineFloat): AffineFloat = {//incr("divsqrt")
     new AffineFloat(this.d / y.d, this.aa / y.aa)}
-  def unary_-(): AffineFloat = {
-    incr("+")
+  def unary_-(): AffineFloat = {//incr("+")
     new AffineFloat(-this.d, -this.aa)}
 
   def %(y: AffineFloat): AffineFloat = {
