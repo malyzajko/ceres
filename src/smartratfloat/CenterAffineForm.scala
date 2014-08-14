@@ -84,12 +84,12 @@ case class CenterForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
         }
         else {
           /* Calculate the inverse. */
-          println("computing inverse")
+          //println("computing inverse")
           val (alpha, dmin, dmax) = computeInverse(yloD, yhiD, ylo, yhi)
           var zeta: Rational = computeCentralZeta(1.0/y0, alpha, y0)
           if(yloD < 0.0) zeta = -zeta
           val delta = computeDelta(zeta, dmin, dmax)
-          println("computing symmetic unary")
+          //println("computing symmetic unary")
           symmetricUnary(1.0/y0, ynoise, alpha, zeta, delta)
       }
       inverse match {

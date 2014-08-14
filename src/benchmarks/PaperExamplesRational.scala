@@ -2,7 +2,7 @@ package ceres
 package benchmarks
 
 
-import smartratfloat._
+
 import scala.collection.mutable.LinkedList
 
 /**
@@ -16,12 +16,14 @@ object PaperExamplesRational extends App {
    * Computes the cube root of 10 by Halley's method.
    */
   def cubeRoot = {
+    import smartratfloat._
+    //import smartfloat._
     import AffineFloat._
     println("~~~ Cube root ~~~")
     val a: AffineFloat = 10
     var xn = AffineFloat(1.6)
 
-    for(i <- 1 until 3) {
+    for(i <- 1 until 5) {
         xn = xn * ((xn*xn*xn + 2.0*a)/(2.0*xn*xn*xn + a))
     }
     println("final:" + xn.toStringWithAbsErrors)
@@ -231,7 +233,7 @@ object PaperExamplesRational extends App {
   /**
    * This is not in the paper, but fun. Just try...
    */
-  def rumpsFunction = {
+  /*def rumpsFunction = {
     import AffineFloat._
     
     val x = AffineFloat(77617.0)
@@ -240,7 +242,7 @@ object PaperExamplesRational extends App {
     val f = (333.75 - x*x) * (y*y*y*y*y*y) + x*x *(11.0*x*x*y*y - 121.0*y*y*y*y - 2.0) + 5.5 * y*y*y*y*y*y*y*y + x/(2.0*y)
     println("f : " + f.interval)
   
-  }
+  }*/
   
   //true ranges are:= for u \in [0, 1]
   /*def bSplines(u: SmartFloat) = {

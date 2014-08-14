@@ -10,7 +10,6 @@ import scala.math.{ScalaNumericConversions, ScalaNumber}
 import scala.language.implicitConversions
 
 object SmartFloat {
-  case class SmartFloatComparisonUndetermined(s: String) extends Exception
 
   class SmartDouble(d: Double) {
     def +/-(un: Double): SmartFloat = new SmartFloat(d, new GeneralForm(d, un))
@@ -30,13 +29,19 @@ object SmartFloat {
    */
   def certainly(b: => Boolean): Boolean = {
     try { b }
-    catch { case e: SmartFloatComparisonUndetermined => false }
+    catch { case e: ComparisonUndeterminedException => false }
   }
 
   def possibly(b: => Boolean): Boolean = {
     try { b }
-    catch { case e: SmartFloatComparisonUndetermined => true }
+    catch { case e: ComparisonUndeterminedException => true }
   }
+
+  /**
+   * If set to false due to some operation, then some loop or condition guard has failed
+   * due to too big errors: i.e. for some of the values, the control would be different.
+   */
+  var conditionFlag = true
 
 
   val E = SmartFloat(math.E)
@@ -205,8 +210,13 @@ class SmartFloat(val d: Double, val aa: AffineForm) extends ScalaNumber with Sca
     else if (iDiff.xhi < 0.0) return 1 //x is bigger
 
     else {
-      //throw SmartFloatComparisonUndetermined(this.interval + " and "+ y.interval +" are incomparable.")
-      return java.lang.Double.compare(this.d, y.d)
+      if (printComparisonFailure) {
+        conditionFlag = false
+        println("comparison failed! " + failMessage + "  uncertainty interval: " + iDiff)
+        return java.lang.Double.compare(this.d, y.d)  
+      } else {
+        throw ComparisonUndeterminedException(this.interval + " and "+ y.interval +" are incomparable.")
+      }
     }
   }
 

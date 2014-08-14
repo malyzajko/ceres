@@ -26,6 +26,20 @@ object AffineFloat {
     else new AffineFloat(d, new CenterForm(d))
   }
 
+  /*
+    Exception handler for comparisons.
+   */
+  def certainly(b: => Boolean): Boolean = {
+    try { b }
+    catch { case e: ComparisonUndeterminedException => false }
+  }
+
+  def possibly(b: => Boolean): Boolean = {
+    try { b }
+    catch { case e: ComparisonUndeterminedException => true }
+  }
+
+
   /**
    * If set to false due to some operation, then some loop or condition guard has failed
    * due to too big errors: i.e. for some of the values, the control would be different.
@@ -201,11 +215,15 @@ class AffineFloat(val d: Double, val aa: AffineForm) extends ScalaNumber
     else if (iDiff.xhi < 0.0) return 1 //x is bigger
 
     else {
-      //comparison has failed: go by the middle value
-      conditionFlag = false
-      if (printComparisonFailure) println("comparison failed! " + failMessage
-          + "  uncertainty interval: " + iDiff)
-      return java.lang.Double.compare(this.d, y.d)
+      if (printComparisonFailure) {
+        //comparison has failed: go by the middle value
+        conditionFlag = false
+        println("comparison failed! " + failMessage + "  uncertainty interval: " + iDiff)
+        return java.lang.Double.compare(this.d, y.d)  
+      } else {
+        throw ComparisonUndeterminedException(this.interval + " and "+ y.interval +" are incomparable.")
+      }
+      
     }
   }
 

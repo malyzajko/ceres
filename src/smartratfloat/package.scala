@@ -2,7 +2,7 @@ package ceres
 
 package object smartratfloat {
 
-  var doubleFormat = "%1.4e"
+  var doubleFormat = "%1.16e"
 
   var maxNoiseCount = 42
 

@@ -108,19 +108,19 @@ class AffineFloat(val d: Double, val aa: AffineForm) extends ScalaNumber
              else new CenterForm(ff))
 
   def +(y: AffineFloat): AffineFloat = {
-    println("+")
+    //println("+")
     new AffineFloat(this.d + y.d, this.aa + y.aa)
   }
   def -(y: AffineFloat): AffineFloat = {
-    println("-")
+    //println("-")
     new AffineFloat(this.d - y.d, this.aa - y.aa)
   }
   def *(y: AffineFloat): AffineFloat = {
-    println("*")
+    //println("*")
     new AffineFloat(this.d * y.d, this.aa * y.aa)
   }
   def /(y: AffineFloat): AffineFloat = {
-    println("/")
+    //println("/")
     new AffineFloat(this.d / y.d, this.aa / y.aa)
   }
   def unary_-(): AffineFloat = new AffineFloat(-this.d, -this.aa)

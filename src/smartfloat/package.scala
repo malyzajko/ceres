@@ -44,6 +44,8 @@ package object smartfloat {
   /*
     #####################     OPTIONS     #########################
   */
+  case class ComparisonUndeterminedException(s: String) extends Exception
+
   /** If true, will print a warning each time a comparison fails.*/
   var printComparisonFailure = false
 
