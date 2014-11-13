@@ -1,11 +1,11 @@
-#include "ceres_common_DirectedRounding.h"
+#include "ceres_DirectedRounding.h"
 #include <fenv.h>
 #include <assert.h>
 #include <math.h>
 
 #pragma STDC FENV_ACCESS ON
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_addUp
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_addUp
   (JNIEnv *env, jclass cls, jdouble a, jdouble b) {
     int save_round;
     int setround_ok;
@@ -21,7 +21,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_addUp
 
 
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_addDown
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_addDown
   (JNIEnv *env, jclass cls, jdouble a, jdouble b) {
     int save_round;
     int setround_ok;
@@ -35,7 +35,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_addDown
     return result;
 }
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_subUp
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_subUp
   (JNIEnv *env, jclass cls, jdouble a, jdouble b) {
     int save_round;
     int setround_ok;
@@ -49,7 +49,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_subUp
     return result;
 }
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_subDown
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_subDown
   (JNIEnv *env, jclass cls, jdouble a, jdouble b) {
     int save_round;
     int setround_ok;
@@ -63,7 +63,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_subDown
     return result;
 }
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_multUp
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_multUp
   (JNIEnv *env, jclass cls, jdouble a, jdouble b) {
     int save_round;
     int setround_ok;
@@ -77,7 +77,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_multUp
     return result;
 }
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_multDown
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_multDown
   (JNIEnv *env, jclass cls, jdouble a, jdouble b) {
     int save_round;
     int setround_ok;
@@ -91,7 +91,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_multDown
     return result;
 }
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_divUp
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_divUp
   (JNIEnv *env, jclass cls, jdouble a, jdouble b) {
     int save_round;
     int setround_ok;
@@ -106,7 +106,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_divUp
 }
 
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_divDown
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_divDown
   (JNIEnv *env, jclass cls, jdouble a, jdouble b) {
     int save_round;
     int setround_ok;
@@ -120,7 +120,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_divDown
     return result;
 }
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_sqrtDown
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_sqrtDown
   (JNIEnv *env, jclass cls, jdouble a) {
     int save_round;
     int setround_ok;
@@ -134,7 +134,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_sqrtDown
     return result;
 }
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_sqrtUp
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_sqrtUp
   (JNIEnv *env, jclass cls, jdouble a) {
     int save_round;
     int setround_ok;
@@ -150,7 +150,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_sqrtUp
 
 
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_addRoundoff
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_addRoundoff
   (JNIEnv *env, jclass cls, jdouble delta, jdouble zi, jdouble ai, jdouble bi) {
     int save_round;
     int setround_ok;
@@ -169,7 +169,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_addRoundoff
   }
 
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_computeZeta
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_computeZeta
   (JNIEnv *env, jclass cls, jdouble dmin, jdouble dmax) {
     int save_round;
     int setround_ok;
@@ -189,7 +189,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_computeZeta
     return result;
   }
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_computeDelta
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_computeDelta
   (JNIEnv *env, jclass cls, jdouble zeta, jdouble dmin, jdouble dmax) {
     int save_round;
     int setround_ok;
@@ -205,7 +205,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_computeDelta
   }
 
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_addRoundoffAtimesBplusC
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_addRoundoffAtimesBplusC
   (JNIEnv *env, jclass cls, jdouble delta, jdouble a, jdouble b, jdouble c) {
     int save_round;
     int setround_ok;
@@ -231,7 +231,7 @@ JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_addRoundoffAtimesBp
   }
 
 
-JNIEXPORT jdouble JNICALL Java_ceres_common_DirectedRounding_addRoundoffABplusCD
+JNIEXPORT jdouble JNICALL Java_ceres_DirectedRounding_addRoundoffABplusCD
   (JNIEnv *env, jclass cls, jdouble delta, jdouble a, jdouble b, jdouble c, jdouble d) {
     int save_round;
     int setround_ok;

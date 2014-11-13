@@ -1,6 +1,5 @@
-package ceres
 
-package object common {
+package object ceres {
 
   def niceDoubleString(d: Double) = {
     var numString = "%.16g".format(d)

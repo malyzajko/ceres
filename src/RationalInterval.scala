@@ -1,20 +1,19 @@
-package ceres.common
+package ceres
 
 
 import Rational._
 
 
 case class RationalInterval(xlo: Rational, xhi: Rational) {
-  private val zero = Rational(0.0)
-
+  
   case class DivisionByZeroException(s: String) extends Exception
   
   //def this(aa: RationalForm) = this(aa.interval._1, aa.interval._2)
   //def this(aa: FixedForm) = this(aa.qInterval._1, aa.qInterval._2)
-  def this(i: Interval) = this(Rational(i.xlo), Rational(i.xhi))
+  def this(i: Interval) = this(fromDouble(i.xlo), fromDouble(i.xhi))
 
-  val mid: Rational = xlo/Rational(2.0) + xhi/Rational(2.0)
-  val radius: Rational = abs(xhi - xlo) / Rational(2.0)
+  val mid: Rational = xlo/two + xhi/two
+  val radius: Rational = abs(xhi - xlo) / two
 
   // FIXME: not sound
   val toInterval: Interval = Interval(xlo.toDouble, xhi.toDouble)
@@ -31,7 +30,7 @@ case class RationalInterval(xlo: Rational, xhi: Rational) {
 
   def *(y: RationalInterval): RationalInterval = y match {
     case RationalInterval(ylo, yhi) =>
-      if(xlo == 0.0 && xhi == 0.0) return RationalInterval(Rational(0.0), Rational(0.0))
+      if(xlo == 0.0 && xhi == 0.0) return RationalInterval(zero, zero)
       else if(xlo >= zero) {
         if(ylo >= zero) RationalInterval(xlo * ylo, xhi * yhi)
         else if(yhi <= zero) RationalInterval(xhi * ylo, xlo * yhi)
@@ -56,7 +55,7 @@ case class RationalInterval(xlo: Rational, xhi: Rational) {
   def /(y: RationalInterval): RationalInterval = y match {
     case RationalInterval(ylo, yhi) =>
 
-      if(xlo == 0.0 && ylo == 0.0) return RationalInterval(Rational(0.0), Rational(0.0))
+      if(xlo == 0.0 && ylo == 0.0) return RationalInterval(zero, zero)
       else if(ylo >= zero) {
         if(xlo >= zero) RationalInterval(xlo / yhi, xhi/ ylo)
         else if(xhi <= zero) RationalInterval(xlo / ylo, xhi / yhi)
@@ -69,7 +68,7 @@ case class RationalInterval(xlo: Rational, xhi: Rational) {
       }
       else {
         throw DivisionByZeroException("trying to divide by interval containing 0")
-        return RationalInterval(Rational(0.0), Rational(0.0))
+        return RationalInterval(zero, zero)
       }
   }
 

@@ -1,4 +1,4 @@
-package ceres.common;
+package ceres;
 
 import java.lang.Math;
 

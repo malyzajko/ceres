@@ -1,6 +1,6 @@
 package ceres.affine
 
-import ceres.common._
+import ceres._
 
 
 import collection.mutable.Queue

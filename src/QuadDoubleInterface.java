@@ -1,4 +1,4 @@
-package ceres.common;
+package ceres;
 
 public class QuadDoubleInterface {
 
