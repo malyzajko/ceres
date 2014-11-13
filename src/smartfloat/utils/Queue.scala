@@ -1,6 +1,6 @@
 package ceres.smartfloat
 
-import ceres.common.DDouble
+import ceres.DDouble
 
 object BasicQueue {
   val MAX_SIZE = 90

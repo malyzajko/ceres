@@ -7,16 +7,16 @@ import scala.Double.{PositiveInfinity => PlusInf}
 import scala.Double.{NegativeInfinity => MinusInf}
 import scala.Double.{MaxValue, MinValue}
 
-import ceres.common._
-import ceres.common.{DirectedRounding => DirRound}
+import ceres._
+import ceres.{DirectedRounding => DirRound}
 
 import DDouble._
 import math.{min => mmin, max => mmax, abs => mabs}
 //So they don't get confused...
-import ceres.common.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
+import ceres.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
       divDown => divD, subDown => subD, subUp => subU, addUp => addU, addDown => addD,
       sqrtDown => sqrtD, sqrtUp => sqrtU}
-import ceres.common.DirectedRounding.{down1 => d1, up1 => u1, nextDown}
+import ceres.DirectedRounding.{down1 => d1, up1 => u1, nextDown}
 
 object AForm {
   import AffineForm._

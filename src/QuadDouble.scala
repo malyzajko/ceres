@@ -1,8 +1,8 @@
-package ceres.common 
+package ceres 
 
 import scala.math.{ScalaNumericConversions, ScalaNumber}
 
-import ceres.common.{QuadDoubleInterface => QDI}
+import ceres.{QuadDoubleInterface => QDI}
 
 //import scala.language.implicitConversions
 

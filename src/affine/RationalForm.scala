@@ -1,6 +1,6 @@
 package ceres.affine
 
-import ceres.common._
+import ceres._
 import Rational._
 import RationalForm._
 import collection.mutable.Queue
@@ -13,7 +13,7 @@ object RationalForm {
   def apply(interval: RationalInterval): RationalForm = {
     val a = interval.xlo
     val b = interval.xhi
-    val un = (b - a)/ Rational(2)
+    val un = (b - a)/ two
     new RationalForm(a + un, un)
   }
 
@@ -67,7 +67,7 @@ case class RationalForm(val x0: Rational, var noise: Queue[Deviation]) {
     "[%f,%f]".format(intervalDouble.xlo, intervalDouble.xhi)
 
   def absValue: RationalForm = {
-    if (Rational(0) <= x0) return this else return -this
+    if (zero <= x0) return this else return -this
   }
 
   def isNonZero: Boolean = return (x0 != 0 || noise.size > 0)
@@ -107,11 +107,11 @@ case class RationalForm(val x0: Rational, var noise: Queue[Deviation]) {
   def inverse: RationalForm = {
     val (xlo, xhi) = (interval.xlo, interval.xhi)
 
-    if (xlo <= Rational(0.0) && xhi >= Rational(0.0))
+    if (xlo <= zero && xhi >= zero)
       throw DivisionByZeroException("Possible division by zero: " + toString)
 
     if(noise.size == 0.0) { //exact
-      val inv = Rational(1.0)/x0
+      val inv = one/x0
       return new RationalForm(inv, new Queue[Deviation]())
     }
 
@@ -119,13 +119,13 @@ case class RationalForm(val x0: Rational, var noise: Queue[Deviation]) {
     val a = min(abs(xlo), abs(xhi))
     val b = max(abs(xlo), abs(xhi))
 
-    val alpha = Rational(-1.0) / (b * b)
+    val alpha = -one / (b * b)
 
-    val dmax = (Rational(1.0) / a) - (alpha * a)
-    val dmin = (Rational(1.0) / b) - (alpha * b)
+    val dmax = (one / a) - (alpha * a)
+    val dmin = (one / b) - (alpha * b)
 
-    var zeta = (dmin / Rational(2.0)) + (dmax / Rational(2.0))
-    if (xlo < Rational(0.0)) zeta = -zeta
+    var zeta = (dmin / two) + (dmax / two)
+    if (xlo < zero) zeta = -zeta
     val delta = max( zeta - dmin, dmax - zeta )
 
     val z0 = alpha * this.x0 + zeta
@@ -144,16 +144,16 @@ case class RationalForm(val x0: Rational, var noise: Queue[Deviation]) {
 
   private def multiplyNonlinearQueues(xqueue: Queue[Deviation], yqueue: Queue[Deviation]): Rational = {
     val indices = mergeIndices(getIndices(xqueue), getIndices(yqueue))
-    var zqueue = Rational(0.0)
+    var zqueue = zero
 
     var i = 0
     while (i < indices.length) {
       val iInd = indices(i)
       // quadratic
       val xi = xqueue.find((d: Deviation) => d.index == iInd) match {
-        case Some(d) => d.value; case None => Rational(0) }
+        case Some(d) => d.value; case None => zero }
       val yi = yqueue.find((d: Deviation) => d.index == iInd) match {
-        case Some(d) => d.value; case None => Rational(0) }
+        case Some(d) => d.value; case None => zero }
       val zii = xi * yi
       if (zii != 0) zqueue += abs(zii)
 
@@ -161,9 +161,9 @@ case class RationalForm(val x0: Rational, var noise: Queue[Deviation]) {
       while (j < indices.length) {
         val jInd = indices(j)
         val xj = xqueue.find((d: Deviation) => d.index == jInd) match {
-        case Some(d) => d.value; case None => Rational(0) }
+        case Some(d) => d.value; case None => zero }
         val yj = yqueue.find((d: Deviation) => d.index == jInd) match {
-        case Some(d) => d.value; case None => Rational(0) }
+        case Some(d) => d.value; case None => zero }
         val zij = xi * yj + xj * yi
         if (zij != 0) zqueue += abs(zij)
         j += 1
@@ -176,28 +176,28 @@ case class RationalForm(val x0: Rational, var noise: Queue[Deviation]) {
   // Does a smarter computation of the quadratic terms
   private def multiplyNonlinearQueues2(xqueue: Queue[Deviation], yqueue: Queue[Deviation]): (Rational, Rational) = {
     val indices = mergeIndices(getIndices(xqueue), getIndices(yqueue))
-    var zqueue = Rational(0.0)
-    var z0Addition = Rational(0.0)
+    var zqueue = zero
+    var z0Addition = zero
 
     var i = 0
     while (i < indices.length) {
       val iInd = indices(i)
       // quadratic
       val xi = xqueue.find((d: Deviation) => d.index == iInd) match {
-        case Some(d) => d.value; case None => Rational(0) }
+        case Some(d) => d.value; case None => zero }
       val yi = yqueue.find((d: Deviation) => d.index == iInd) match {
-        case Some(d) => d.value; case None => Rational(0) }
+        case Some(d) => d.value; case None => zero }
       val zii = xi * yi
-      z0Addition += zii / Rational(2.0)
-      if (zii != 0) zqueue += abs(zii / Rational(2.0))
+      z0Addition += zii / two
+      if (zii != 0) zqueue += abs(zii / two)
 
       var j = i + 1
       while (j < indices.length) {
         val jInd = indices(j)
         val xj = xqueue.find((d: Deviation) => d.index == jInd) match {
-          case Some(d) => d.value; case None => Rational(0) }
+          case Some(d) => d.value; case None => zero }
         val yj = yqueue.find((d: Deviation) => d.index == jInd) match {
-        case Some(d) => d.value; case None => Rational(0) }
+        case Some(d) => d.value; case None => zero }
         val zij = xi * yj + xj * yi
         if (zij != 0) zqueue += abs(zij)
         j += 1
@@ -228,7 +228,7 @@ case class RationalForm(val x0: Rational, var noise: Queue[Deviation]) {
     val threshold: Double = avrg + stdDev
 
     //Now compute the new queue
-    var newNoise = Rational(0)
+    var newNoise = zero
     var newDev = new Queue[Deviation]()
 
     val iter2 = queue.iterator

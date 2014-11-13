@@ -1,8 +1,8 @@
 package ceres.smartfloat
 
 import GeneralForm._
-import ceres.common.DirectedRounding._
-import ceres.common.Interval
+import ceres.DirectedRounding._
+import ceres.Interval
 import java.lang.Math.{nextUp}
 
 import scala.math.{ScalaNumericConversions, ScalaNumber}

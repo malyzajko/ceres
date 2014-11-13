@@ -1,20 +1,20 @@
 package ceres.smartfloat
 
 import AffineArithmetic._
-import ceres.common.DDouble
+import ceres.DDouble
 import DDouble._
 import scala.Double.{PositiveInfinity => PlusInf}
 import scala.Double.{NegativeInfinity => MinusInf}
 import scala.Double.{MaxValue, MinValue, NaN}
-import ceres.common.{DirectedRounding => DirRound}
-import ceres.common.{Interval, NormalInterval, EmptyInterval}
+import ceres.{DirectedRounding => DirRound}
+import ceres.{Interval, NormalInterval, EmptyInterval}
 
 import math.{min => mmin, max => mmax, abs => mabs}
 //So they don't get confused...
-import ceres.common.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
+import ceres.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
       divDown => divD, subDown => subD, subUp => subU, addUp => addU, addDown => addD,
       sqrtDown => sqrtD, sqrtUp => sqrtU}
-import ceres.common.DirectedRounding.{down1 => d1, up1 => u1, nextDown}
+import ceres.DirectedRounding.{down1 => d1, up1 => u1, nextDown}
 
 
 case class CenterForm(x0: Double, var xnoise: Queue) extends AbstractAForm {

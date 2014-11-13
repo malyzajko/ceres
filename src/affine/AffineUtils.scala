@@ -2,13 +2,13 @@ package ceres.affine
 
 import collection.mutable.Queue
 
-import ceres.common._
+import ceres._
 import DDouble._
 import math.{min => mmin, max => mmax, abs => mabs}
-import ceres.common.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
+import ceres.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
       divDown => divD, subDown => subD, subUp => subU, addUp => addU, addDown => addD,
       sqrtDown => sqrtD, sqrtUp => sqrtU}
-import ceres.common.DirectedRounding.{down1 => d1, up1 => u1, nextDown}
+import ceres.DirectedRounding.{down1 => d1, up1 => u1, nextDown}
 
 case class NoiseTerm(index: Int, value: Array[Double]) {
   def unary_-(): NoiseTerm = new NoiseTerm(index, Array(-value(0), -value(1)))

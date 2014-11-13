@@ -1,6 +1,6 @@
 package ceres.smartfloat
 
-import ceres.common.DirectedRounding.{addUp}
+import ceres.DirectedRounding.{addUp}
 import scala.Double.NaN
 import scala.collection.immutable.HashMap
 
