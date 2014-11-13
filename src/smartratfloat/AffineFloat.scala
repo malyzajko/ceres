@@ -1,8 +1,8 @@
 package ceres.smartratfloat
 
 import CenterForm._
-import ceres.common.DirectedRounding._
-import ceres.common.{Interval, NormalInterval, EmptyInterval}
+import ceres.DirectedRounding._
+import ceres.{Interval, NormalInterval, EmptyInterval}
 import scala.Double.{PositiveInfinity => PlusInf, NegativeInfinity => MinusInf}
 
 import scala.math.{ScalaNumericConversions, ScalaNumber}

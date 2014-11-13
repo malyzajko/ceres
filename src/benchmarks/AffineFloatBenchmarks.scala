@@ -31,7 +31,7 @@ object AffineFloatBenchmarks extends App {
       val f = (333.75 - x*x) * (y*y*y*y*y*y) + x*x *(11.0*x*x*y*y - 121.0*y*y*y*y - 2.0) + 5.5 * y*y*y*y*y*y*y*y + x/(2.0*y)
       println("rumps function: \nf : " + f.toStringWithAbsErrors)
     }
-    import ceres.common.{QuadDouble => QD}
+    import ceres.{QuadDouble => QD}
     {
       val x = QD(77617.0)
       val y = QD(33096.0)

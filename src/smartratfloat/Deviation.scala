@@ -1,6 +1,6 @@
 package ceres.smartratfloat
 
-import ceres.common.Rational
+import ceres.Rational
 import Rational._
 import scala.collection.immutable.HashMap
 
@@ -28,13 +28,13 @@ sealed abstract class Deviation(i: Int, v: Rational) extends NoiseTerm[Rational]
 
 case class Noise(val i: Int, val v: Rational) extends Deviation(i, v) {
 
-  def this(i: Int, d: Double) = this(i, Rational(d))
+  def this(i: Int, d: Double) = this(i, fromDouble(d))
   def unary_-(): Noise = new Noise(index, -value)
 }
 
 case class Uncertainty(val i: Int, val v: Rational) extends Deviation(i, v) {
 
-  def this(i: Int, d: Double) = this(i, Rational(d))
+  def this(i: Int, d: Double) = this(i, fromDouble(d))
   def unary_-(): Uncertainty = new Uncertainty(index, -value)
 }
 

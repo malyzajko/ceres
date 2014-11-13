@@ -1,6 +1,6 @@
 package ceres.smartratfloat
 
-import ceres.common.Rational
+import ceres.Rational
 
 object BasicQueue {
   val MAX_SIZE = 90

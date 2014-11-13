@@ -16,7 +16,7 @@ import java.util.Scanner;
 
 import scala.io.Source
 
-import ceres.common.{QuadDouble => QD}
+import ceres.{QuadDouble => QD}
 import smartfloat.{AffineFloat => AF, IntervalFloat => IF, SmartFloat => SF}
 
 object MoonPositionTest extends App {

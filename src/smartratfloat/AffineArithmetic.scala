@@ -3,15 +3,15 @@ package ceres.smartratfloat
 import scala.Double.{PositiveInfinity => PlusInf}
 import scala.Double.{NegativeInfinity => MinusInf}
 import scala.Double.{MaxValue, MinValue, NaN}
-import ceres.common.{DirectedRounding => DirRound}
+import ceres.{DirectedRounding => DirRound}
 
 import AffineUtils._
 
 
-import ceres.common.Rational
+import ceres.Rational
 import Rational._
 
-import ceres.common.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
+import ceres.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
       divDown => divD, subDown => subD, subUp => subU, addUp => addU, addDown => addD,
       sqrtDown => sqrtD, sqrtUp => sqrtU}
 
@@ -43,7 +43,7 @@ object AffineArithmetic {
     var z0 = x0 + y0
     if(z0 == PlusInf || z0 == MinusInf) return All
     var roundoff = if (addD(x0, y0) == addU(x0, y0)) zero
-      else Rational(DirRound.roundOff(z0)) //scaleToIntsUp(Rational(DirRound.roundOff(z0)))
+      else fromDouble(DirRound.roundOff(z0)) //scaleToIntsUp(Rational(DirRound.roundOff(z0)))
 
     var deviation = addQueuesUncertain(xnoise, ynoise)
     
@@ -56,7 +56,7 @@ object AffineArithmetic {
     var z0 = x0 - y0
     if(z0 == PlusInf || z0 == MinusInf) return All
     var roundoff = if (subD(x0, y0) == subU(x0, y0)) zero
-      else  Rational(DirRound.roundOff(z0)) //scaleToIntsUp( Rational(DirRound.roundOff(z0)) )
+      else fromDouble(DirRound.roundOff(z0)) //scaleToIntsUp( Rational(DirRound.roundOff(z0)) )
 
     var deviation = subtractQueuesUncertain(xnoise, ynoise)
     
@@ -71,7 +71,7 @@ object AffineArithmetic {
     var z0 = if (hint != hint) x0 * y0 else hint
     if(z0 == PlusInf || z0 == MinusInf) return All
     var roundoff = if (multD(x0, y0) == multU(x0, y0)) zero
-      else Rational(DirRound.roundOff(z0))// scaleToIntsUp( Rational(DirRound.roundOff(z0)) )
+      else fromDouble(DirRound.roundOff(z0))// scaleToIntsUp( Rational(DirRound.roundOff(z0)) )
 
     var delta =  xRadius * yRadius
     delta = delta + roundoff

@@ -1,9 +1,9 @@
 package ceres.smartratfloat
 
-import ceres.common.Rational
+import ceres.Rational
 import Rational._
 
-import ceres.common.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
+import ceres.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
       divDown => divD, subDown => subD, subUp => subU, addUp => addU, addDown => addD,
       sqrtDown => sqrtD, sqrtUp => sqrtU}
 
@@ -79,8 +79,8 @@ object AffineUtils {
     val iterX = xqueue.getIterator
     val iterY = yqueue.getIterator
 
-    val aRat = Rational(a)
-    val bRat = Rational(b)
+    val aRat = fromDouble(a)
+    val bRat = fromDouble(b)
 
     val fx = (d: Deviation) => {
       val zi =  bRat * d.value
@@ -186,15 +186,15 @@ object AffineUtils {
 
     val alpha =  - one / (b *b)  //no rounding, it's intentional
 
-    val dmax = Rational(divU(1.0, ad)) - (alpha * a)
-    val dmin = Rational(divD(1.0, bd)) - (alpha * b)
+    val dmax = fromDouble(divU(1.0, ad)) - (alpha * a)
+    val dmin = fromDouble(divD(1.0, bd)) - (alpha * b)
 
     return (alpha, dmin, dmax)
   }
 
   def computeCentralZeta(z0: Double, alpha: Rational, x0: Double): Rational = {
-    val z0d = Rational(z0)
-    val x0d = Rational(x0)
+    val z0d = fromDouble(z0)
+    val x0d = fromDouble(x0)
 
     val zeta = z0d - (alpha * x0d)
     val zetaDown = zeta //subDown(z0d -  alpha * x0d))

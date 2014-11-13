@@ -2,11 +2,11 @@ package ceres.smartratfloat
 
 import scala.Double.{PositiveInfinity => PlusInf}
 import scala.Double.{NegativeInfinity => MinusInf}
-import ceres.common.{DirectedRounding => DirRound}
+import ceres.{DirectedRounding => DirRound}
 
-import ceres.common.{Interval, NormalInterval, EmptyInterval}
+import ceres.{Interval, NormalInterval, EmptyInterval}
 
-import ceres.common.Rational
+import ceres.Rational
 import Rational._
 
 abstract class AffineForm {
@@ -86,7 +86,7 @@ abstract class AbstractAForm extends AffineForm {
   }
 
   val intervalExt: (Rational, Rational) =
-    ( Rational(x0) - radiusExt, Rational(x0) + radiusExt )
+    ( fromDouble(x0) - radiusExt, fromDouble(x0) + radiusExt )
 
   val radius: Double = radiusExt.toDouble
 

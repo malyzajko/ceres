@@ -1,16 +1,16 @@
 package ceres.smartratfloat
 
 import AffineArithmetic._
-import ceres.common.Rational
+import ceres.Rational
 import Rational._
 import scala.Double.{PositiveInfinity => PlusInf}
 import scala.Double.{NegativeInfinity => MinusInf}
 import scala.Double.{MaxValue, MinValue, NaN}
-import ceres.common.{DirectedRounding => DirRound}
-import ceres.common.{Interval, NormalInterval, EmptyInterval}
+import ceres.{DirectedRounding => DirRound}
+import ceres.{Interval, NormalInterval, EmptyInterval}
 
 //So they don't get confused...
-import ceres.common.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
+import ceres.DirectedRounding.{multDown => multD, multUp => multU, divUp => divU,
       divDown => divD, subDown => subD, subUp => subU, addUp => addU, addDown => addD,
       sqrtDown => sqrtD, sqrtUp => sqrtU}
 
@@ -22,7 +22,7 @@ case class CenterForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
 
   def this(f: Double) = {
      this(f, if(DirRound.isExact(f)) Queue.empty
-            else new Queue(new Noise(AffineForm.newIndex, Rational(DirRound.roundOff(f)))))
+            else new Queue(new Noise(AffineForm.newIndex, fromDouble(DirRound.roundOff(f)))))
   }
 
 
@@ -79,7 +79,7 @@ case class CenterForm(x0: Double, var xnoise: Queue) extends AbstractAForm {
         if(ynoise.size == 0) { //exact
           val inv = 1.0/y0
           if(divD(1.0, y0) == divU(1.0, y0)) CenterForm(inv, Queue.empty) //exact division
-          else CenterForm(inv, new Queue(new Noise(newIndex, Rational(DirRound.roundOff(inv)))))
+          else CenterForm(inv, new Queue(new Noise(newIndex, fromDouble(DirRound.roundOff(inv)))))
            //new Queue(new Noise(newIndex, scaleToIntsUp(Rational(DirRound.roundOff(inv))))))
         }
         else {
