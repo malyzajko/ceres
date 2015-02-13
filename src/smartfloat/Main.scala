@@ -3,7 +3,8 @@ import ceres.smartfloat.AffineFloat
 import ceres.smartfloat.SmartFloat
 import ceres.smartfloat.SmartFloat.{certainly, possibly}
 import ceres.smartfloat.IntervalFloat
-
+import scala.math.{min, max, abs}
+import ceres.Interval
 
 
 object Main extends App {
@@ -249,11 +250,26 @@ object Main extends App {
    */
   def quadraticEquation {
     import AffineFloat._
-    println("\nRoots of quadratic equation for a = 2.999, b = 56.0001, c = 1.00074")
+    //println("\nRoots of quadratic equation for a = 2.999, b = 56.0001, c = 1.00074")
 
     var a = AffineFloat(2.999)
     var b = AffineFloat(56.0001)
     var c = AffineFloat(1.00074)
+
+		if(true) {
+				// Tom stuff
+				a = AffineFloat(1)
+  			c = AffineFloat(1e10)
+				b = -(AffineFloat(1)+c)
+    }
+    if(true) {
+				// ceres gives a large interval for this case, but actual error is 2e-9
+				a = AffineFloat(1)
+				c = a
+				b = AffineFloat(-1e8)        
+    }
+    println("\nRoots of quadratic equation for a = "+a+", b = "+b+", c = "+c)
+
     val discr = b*b - a * c * 4.0
 
     //classical way
@@ -274,8 +290,13 @@ object Main extends App {
     }
 
     println("smarter r1 = " + rk1.toStringWithErrors + " , r2 = " + rk2.toStringWithErrors)
-  }
 
+		// lower bound on the error
+		val true_r1 = Interval.intersect(rk1.interval, r1.interval)
+		val true_r2 = Interval.intersect(rk2.interval, r2.interval)
+		println("classic r1 error = " + Interval.distance(true_r1,r1.value) + 
+            ", r2 error = " + Interval.distance(true_r2,r2.value))
+  }
 
   /**
    * Computes the frequency shift from doppler effect.

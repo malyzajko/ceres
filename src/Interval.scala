@@ -60,6 +60,22 @@ object Interval {
   val PI_half = NormalInterval(divDown(math.Pi, 2.0), divUp(math.Pi, 2.0))
 
   var doubleString = "%.16g"
+
+  def intersect(x: Interval, y: Interval): Interval = x match {
+    case EmptyInterval => x
+    case xn:NormalInterval => y match {
+      case EmptyInterval => y
+      case yn:NormalInterval => intersect(xn,yn)
+    }
+  }
+	def intersect(x: NormalInterval, y: NormalInterval): NormalInterval = {
+    return new NormalInterval(max(x.xlo, y.xlo), min(x.xhi, y.xhi))
+  }
+	def distance(y: Interval, x: Double): Double = {
+	  if(x < y.xlo) return (y.xlo - x)
+    else if(x > y.xhi) return (x - y.xhi)
+    else return 0.0
+  }
 }
 
 
