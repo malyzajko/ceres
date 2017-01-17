@@ -17,6 +17,8 @@ object Main extends App {
   springSimulation(0.1, 5.0)
   quadraticEquation
   dopplerEffect
+	log1plus
+  logExpMinus1
 
   def smartfloatDemo = {
     val x = new SmartFloat(5.0, 0.5)
@@ -324,5 +326,36 @@ object Main extends App {
     println("z: " + z.toStringWithAbsErrors)
   }
 
+  def cancellation = {
+    import SmartFloat._
+    println("\nCancellation")
+		val x = SmartFloat(10.0, 1.0)
+    val y = SmartFloat(10.0, 1.0)
+    val z = x + y
+    println("z: " + z)
+  }
 
+	def log1plus = {
+    import SmartFloat._
+    println("\nlog(1+x)")
+	  val x = SmartFloat(0,0.1)
+    val y = log(1+x)
+    println("y: "+y)
+    val x0 = 1e-8
+		val y0true = 0.000000009999999950000001
+		val y0 = math.log(1+x0)
+    println("log(1+x) = " + y0 + " (error = " + math.abs(y0-y0true) + ")")
+  }
+ 
+  def logExpMinus1 = {
+    import SmartFloat._
+    println("\nlog(exp(x)-1)")
+	  val x = SmartFloat(0.1+1e-8,0.1)
+    val y = log(exp(x)-1)
+    println("y: "+y)
+    val x0 = 1e-8
+		val y0true = -18.420680738952367
+		val y0 = math.log(math.exp(x0)-1)
+    println("log(exp(x)-1) = " + y0 + " (error = " + math.abs(y0-y0true) + ")")
+  }
 }
