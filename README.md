@@ -36,3 +36,21 @@ To compile on Linux:
 
     g++ -shared -o libQuadDouble.so ceres_common_QuadDoubleInterface.o ~/share/qd/src/*.o
 
+
+Installation instructions for Windows
+-------------------------------------
+1. install gcc
+2. install java development kit (JDK)
+   http://www.oracle.com/technetwork/java/javase/downloads/index.html
+3. add javac to the system path:
+   C:\Program Files\Java\jdk1.8.0\bin
+4. install sbt
+   http://www.scala-sbt.org/download.html
+5. fork+clone ceres from github
+6. start the Git Shell
+7. go to the ceres folder
+8. type "cmd" to start a windows shell with the correct paths.
+   - type "build" to build the JNI libs for windows (using build.bat)
+   - type "exit" to leave the windows shell
+9. type "sbt". this will start the sbt console.
+10. type "run". this will compile and run the project.

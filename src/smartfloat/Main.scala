@@ -3,7 +3,8 @@ import ceres.smartfloat.AffineFloat
 import ceres.smartfloat.SmartFloat
 import ceres.smartfloat.SmartFloat.{certainly, possibly}
 import ceres.smartfloat.IntervalFloat
-
+import scala.math.{min, max, abs}
+import ceres.Interval
 
 
 object Main extends App {
@@ -16,6 +17,8 @@ object Main extends App {
   springSimulation(0.1, 5.0)
   quadraticEquation
   dopplerEffect
+	log1plus
+  logExpMinus1
 
   def smartfloatDemo = {
     val x = new SmartFloat(5.0, 0.5)
@@ -249,11 +252,26 @@ object Main extends App {
    */
   def quadraticEquation {
     import AffineFloat._
-    println("\nRoots of quadratic equation for a = 2.999, b = 56.0001, c = 1.00074")
+    //println("\nRoots of quadratic equation for a = 2.999, b = 56.0001, c = 1.00074")
 
     var a = AffineFloat(2.999)
     var b = AffineFloat(56.0001)
     var c = AffineFloat(1.00074)
+
+		if(true) {
+				// Tom stuff
+				a = AffineFloat(1)
+  			c = AffineFloat(1e10)
+				b = -(AffineFloat(1)+c)
+    }
+    if(true) {
+				// ceres gives a large interval for this case, but actual error is 2e-9
+				a = AffineFloat(1)
+				c = a
+				b = AffineFloat(-1e8)        
+    }
+    println("\nRoots of quadratic equation for a = "+a+", b = "+b+", c = "+c)
+
     val discr = b*b - a * c * 4.0
 
     //classical way
@@ -274,8 +292,13 @@ object Main extends App {
     }
 
     println("smarter r1 = " + rk1.toStringWithErrors + " , r2 = " + rk2.toStringWithErrors)
-  }
 
+		// lower bound on the error
+		val true_r1 = Interval.intersect(rk1.interval, r1.interval)
+		val true_r2 = Interval.intersect(rk2.interval, r2.interval)
+		println("classic r1 error = " + Interval.distance(true_r1,r1.value) + 
+            ", r2 error = " + Interval.distance(true_r2,r2.value))
+  }
 
   /**
    * Computes the frequency shift from doppler effect.
@@ -303,5 +326,36 @@ object Main extends App {
     println("z: " + z.toStringWithAbsErrors)
   }
 
+  def cancellation = {
+    import SmartFloat._
+    println("\nCancellation")
+		val x = SmartFloat(10.0, 1.0)
+    val y = SmartFloat(10.0, 1.0)
+    val z = x + y
+    println("z: " + z)
+  }
 
+	def log1plus = {
+    import SmartFloat._
+    println("\nlog(1+x)")
+	  val x = SmartFloat(0,0.1)
+    val y = log(1+x)
+    println("y: "+y)
+    val x0 = 1e-8
+		val y0true = 0.000000009999999950000001
+		val y0 = math.log(1+x0)
+    println("log(1+x) = " + y0 + " (error = " + math.abs(y0-y0true) + ")")
+  }
+ 
+  def logExpMinus1 = {
+    import SmartFloat._
+    println("\nlog(exp(x)-1)")
+	  val x = SmartFloat(0.1+1e-8,0.1)
+    val y = log(exp(x)-1)
+    println("y: "+y)
+    val x0 = 1e-8
+		val y0true = -18.420680738952367
+		val y0 = math.log(math.exp(x0)-1)
+    println("log(exp(x)-1) = " + y0 + " (error = " + math.abs(y0-y0true) + ")")
+  }
 }
